@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  text-analyzer:
+    build: ./text-analyzer
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./models:/app/models
+
+  image-analyzer:
+    build: ./image-analyzer
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./models:/app/models
+
+
+
