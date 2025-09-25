@@ -4,6 +4,12 @@ import com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request.S
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.User;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.repository.UserRepository;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.jwt.JwtCore;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Аутентификация", description = "API для регистрации и авторизации пользователей")
 public class SecurityController {
 
     private UserRepository userRepository;
@@ -45,6 +52,20 @@ public class SecurityController {
         this.jwtCore = jwtCore;
     }
 
+
+    @Operation(summary = "Регистрация нового пользователя",
+            description = "Создает нового пользователя в системе")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Пользователь успешно создан",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "SignUpRequest(username=Username, email=Username@example.com, password=mySecurePassword123, role=user)"))),
+            @ApiResponse(responseCode = "400", description = "Неверные данные",
+                    content = @Content(mediaType = "text/plain",
+                            examples = {
+                                    @ExampleObject(name = "Username занят", value = "Имя пользователя username занято"),
+                                    @ExampleObject(name = "Email занят", value = "Этот почтовый ящик уже используется")
+                            }))
+    })
     @PostMapping("/signup")
     ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -61,10 +82,18 @@ public class SecurityController {
         user.setEmail(signUpRequest.getEmail());
         user.setRole(signUpRequest.getRole());
         userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Пользователь " + user + " успешно создан!");
+        return ResponseEntity.status(HttpStatus.CREATED).body(signUpRequest.toString());
 
     }
 
+    @Operation(summary = "Авторизация пользователя",
+            description = "Аутентификация пользователя и получение JWT токена")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешная авторизация",
+                    content = @Content(mediaType = "text/plain",
+                            examples = @ExampleObject(value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."))),
+            @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
+    })
     @PostMapping("/signin")
     ResponseEntity<?> signin(@RequestBody SignInRequest signInRequest) {
         Authentication authentication = null;
