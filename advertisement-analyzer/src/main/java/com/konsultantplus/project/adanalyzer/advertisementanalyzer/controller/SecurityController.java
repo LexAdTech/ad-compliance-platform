@@ -1,7 +1,9 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.controller;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request.SignInRequest;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request.SignUpRequest;
+import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.Role;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.User;
+import com.konsultantplus.project.adanalyzer.advertisementanalyzer.repository.RoleRepository;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.repository.UserRepository;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.jwt.JwtCore;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,12 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @Tag(name = "Аутентификация", description = "API для регистрации и авторизации пользователей")
 public class SecurityController {
-
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JwtCore jwtCore;
-
+    private RoleRepository roleRepository;
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
@@ -50,6 +51,11 @@ public class SecurityController {
     @Autowired
     public void setJwtCore(JwtCore jwtCore) {
         this.jwtCore = jwtCore;
+    }
+
+    @Autowired
+    public void setRoleRepository(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
     }
 
 
@@ -76,11 +82,12 @@ public class SecurityController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Этот почтовый ящик уже используется, попробуйте другой");}
         String hashedPassword = passwordEncoder.encode(signUpRequest.getPassword());
+        Role defaultRole = roleRepository.findByRole("USER");
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setPassword(hashedPassword);
         user.setEmail(signUpRequest.getEmail());
-        user.setRole(signUpRequest.getRole());
+        user.setRole(defaultRole);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(signUpRequest.toString());
 

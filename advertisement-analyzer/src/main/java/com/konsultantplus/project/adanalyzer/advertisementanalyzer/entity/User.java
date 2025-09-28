@@ -4,22 +4,29 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column
+    @Column(name = "username", nullable = false, length = 255)
     private String username;
 
-    @Column
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
-    @Column
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Column
-    private String role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", username='" + username + "', email='" + email + "', role=" + (role != null ? role.getRole() : "null") + "}";
+    }
 }

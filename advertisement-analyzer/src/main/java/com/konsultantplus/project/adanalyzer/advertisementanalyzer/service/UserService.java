@@ -1,5 +1,6 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.service;
 
+import com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request.UpdateUserRequest;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.User;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.repository.UserRepository;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.UserDetailsImpl;
@@ -8,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -26,4 +29,16 @@ public class UserService implements UserDetailsService {
         ));
         return UserDetailsImpl.build(user);
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findUserByUsername(username).orElse(null);
+    }
+
+//    public User updateUser(UpdateUserRequest updateUserRequest) {
+//        return userRepository.save(user);
+//    }
 }
