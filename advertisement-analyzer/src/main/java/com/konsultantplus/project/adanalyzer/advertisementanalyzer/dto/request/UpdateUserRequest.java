@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "Запрос на регистрацию пользователя")
+@Schema(description = "Запрос на обновление данных пользователя")
 public class UpdateUserRequest {
     @Schema(description = "Имя пользователя", example = "testuser", required = true)
     private String username;

@@ -1,7 +1,6 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.config;
 
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.jwt.TokenFilter;
-import com.konsultantplus.project.adanalyzer.advertisementanalyzer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +26,11 @@ public class SecurityConfigurator {
 
     private TokenFilter tokenFilter;
 
-    private UserService userService;
 
-    public SecurityConfigurator(UserService userService) {}
+    @Autowired
+    public SecurityConfigurator(TokenFilter tokenFilter) {
+        this.tokenFilter = tokenFilter;
+    }
 
     @Autowired
     public void setTokenFilter(TokenFilter tokenFilter) {
@@ -50,7 +51,7 @@ public class SecurityConfigurator {
 //    public AuthenticationManagerBuilder authenticationManagerBuilder(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
 //        return authenticationManagerBuilder;
 //    }
-
+//
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity http) throws Exception {
         http
@@ -67,7 +68,8 @@ public class SecurityConfigurator {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/secured/user/**").fullyAuthenticated()
+                        .requestMatchers("/secured/**").fullyAuthenticated()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
