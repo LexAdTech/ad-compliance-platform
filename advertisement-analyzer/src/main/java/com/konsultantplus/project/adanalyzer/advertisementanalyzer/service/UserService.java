@@ -1,10 +1,11 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.service;
 
-import com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request.UpdateUserRequest;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.User;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.repository.UserRepository;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.UserDetailsImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,15 +13,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+//    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+//        this.passwordEncoder = passwordEncoder;
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -30,6 +35,7 @@ public class UserService implements UserDetailsService {
         return UserDetailsImpl.build(user);
     }
 
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -38,7 +44,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserByUsername(username).orElse(null);
     }
 
-//    public User updateUser(UpdateUserRequest updateUserRequest) {
-//        return userRepository.save(user);
-//    }
+    public ResponseEntity<?> deleteUserByUsername(String username) {
+        User user = userRepository.findUserByUsername(username).orElse(null);
+        assert user != null;
+        userRepository.delete(user);
+        return ResponseEntity.ok().body(user);
+    }
 }
+
+

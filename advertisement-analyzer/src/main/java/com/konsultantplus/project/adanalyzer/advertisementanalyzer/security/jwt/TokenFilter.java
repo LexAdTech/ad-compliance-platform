@@ -1,6 +1,5 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.security.jwt;
 
-import com.konsultantplus.project.adanalyzer.advertisementanalyzer.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
