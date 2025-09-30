@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +29,7 @@ public class TokenFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Autowired
-    public TokenFilter(JwtCore jwtCore, UserDetailsService userDetailsService) {
+    public TokenFilter(JwtCore jwtCore, @Lazy UserDetailsService userDetailsService) {
         this.jwtCore = jwtCore;
         this.userDetailsService = userDetailsService;
     }
