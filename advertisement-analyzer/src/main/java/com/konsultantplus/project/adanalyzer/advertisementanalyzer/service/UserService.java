@@ -45,6 +45,7 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> deleteUserByUsername(String username) {
+
         User user = userRepository.findUserByUsername(username).orElse(null);
         assert user != null;
         userRepository.delete(user);
