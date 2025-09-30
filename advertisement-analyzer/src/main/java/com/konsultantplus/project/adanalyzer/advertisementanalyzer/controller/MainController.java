@@ -29,7 +29,7 @@ public class MainController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public MainController(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtCore jwtCore, RoleRepository roleRepository) {
+    public MainController(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtCore jwtCore,RoleRepository roleRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -51,6 +51,13 @@ public class MainController {
         return principal.getName();
     }
 
+    @Operation(summary = "Получить список всех пользователей",
+            description = "Возвращает список всех пользователей в JSON формате",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешное получение данных"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
     @GetMapping("/users")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -59,12 +66,27 @@ public class MainController {
     }
 
 
+    @Operation(summary = "Получить пользователя по его username",
+            description = "Возвращает пользователя в JSON формате",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешное получение данных"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
     @GetMapping("/users/{username}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public User getUser(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
 
+
+    @Operation(summary = "Редактировать данные пользователя",
+            description = "Возвращает ответ",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешное получение данных"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
     @PutMapping("/{username}/edit")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest updateUserRequest,
                                         @PathVariable String username,
@@ -76,13 +98,12 @@ public class MainController {
                     .body("Вы можете редактировать только свой профиль");
         }
 
-        // Остальная логика...
         if (userRepository.existsByUsername(updateUserRequest.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Имя пользователя " + updateUserRequest.getUsername() + " занято, выберите другое имя.");
         }
 
-        if (userRepository.existsByEmail(updateUserRequest.getEmail())) { // Исправлено: должно быть getEmail()
+        if (userRepository.existsByEmail(updateUserRequest.getEmail())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Этот почтовый ящик уже используется, попробуйте другой");
         }
@@ -90,7 +111,6 @@ public class MainController {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        // Хешируем пароль только если он предоставлен
         if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
             String hashedPassword = passwordEncoder.encode(updateUserRequest.getPassword());
             user.setPassword(hashedPassword);
@@ -103,8 +123,19 @@ public class MainController {
         return ResponseEntity.ok("Профиль успешно обновлен");
     }
 
+
+    @Operation(summary = "Удалить пользователя по username",
+            description = "Возвращает удаленного пользователя",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешное получение данных"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
     @DeleteMapping("/{username}/delete")
-    public ResponseEntity<?> deleteUser(@PathVariable String username) {
+    public ResponseEntity<?> deleteUser(@PathVariable String username, Principal principal) {
+        if (!principal.getName().equals(username) || !principal.getName().equals("ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
         return userService.deleteUserByUsername(username);
     }
 }
