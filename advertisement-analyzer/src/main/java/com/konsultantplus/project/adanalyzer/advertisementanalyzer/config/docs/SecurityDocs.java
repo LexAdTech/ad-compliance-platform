@@ -18,22 +18,31 @@ public class SecurityDocs {
     @Operation(
             summary = "Регистрация нового пользователя",
             description = """
-            Создает нового пользователя в системе. После успешной регистрации пользователь получает роль USER по умолчанию.
-            
-            **Валидация:**
-            - Имя пользователя должно быть уникальным
-            - Email должен быть уникальным
-            - Пароль хешируется перед сохранением
-            """
+        Создает нового пользователя в системе. После успешной регистрации пользователь получает роль USER по умолчанию.
+        
+        **Валидация:**
+        - Имя пользователя должно быть уникальным
+        - Email должен быть уникальным
+        - Пароль хешируется перед сохранением
+        """
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
                     description = "Пользователь успешно создан",
                     content = @Content(
-                            mediaType = "text/plain",
+                            mediaType = "application/json",
                             examples = @ExampleObject(
-                                    value = "SignUpRequest(username=testuser, email=test@example.com, password=********)"
+                                    name = "Успешная регистрация",
+                                    value = """
+                                        {
+                                          "id": 1,
+                                          "username": "testuser",
+                                          "email": "test@example.com",
+                                          "role": {
+                                            "role": "USER"
+                                          }
+                                        }"""
                             )
                     )
             ),
