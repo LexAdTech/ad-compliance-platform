@@ -1,0 +1,10 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #faf8f1 60%, #fff 100%);
+}
+
+.main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
