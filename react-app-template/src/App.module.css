@@ -1,0 +1,25 @@
+.app {
+  min-height: 100vh;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* Общие стили для всего приложения */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #faf8f1 60%, #fff 100%);
+}
+
+/* Сброс стилей для кнопок */
+
+button {
+  font-family: inherit;
+}
+
+input, textarea {
+  font-family: inherit;
+}

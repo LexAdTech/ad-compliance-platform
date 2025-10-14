@@ -1,0 +1,196 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #faf8f1 60%, #fff 100%);
+}
+
+.main {
+  display: flex;
+  gap: 150px;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+  align-items: flex-start;
+  margin: 0 auto;
+}
+
+.hero {
+  max-width: 480px;
+  min-width: 270px;
+  margin-top: 40px;
+}
+
+.heroTitle {
+  font-size: 36px;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.blue {
+  color: #1572FF;
+}
+
+.orange {
+  color: #FF7F32;
+}
+
+.heroDescription {
+  margin-top: 16px;
+  font-size: 19px;
+  line-height: 1.45;
+  color: #333;
+}
+
+.heroImage {
+  width: 350px;
+  height: auto;
+  margin-top: 24px;
+}
+
+.checkSection {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px 2px #ece7dd;
+  padding: 25px 22px 32px;
+  width: 600px;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.checkTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+.textarea {
+  font-size: 18px;
+  resize: none;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 12px;
+  width: 90%;
+  margin-bottom: 16px;
+  font-family: inherit;
+  min-height: 120px;
+}
+
+.checkButton {
+  padding: 12px 0;
+  font-size: 22px;
+  background: #FF7F32;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 90%;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.checkButton:hover {
+  background: #e66a29;
+}
+
+.result {
+  margin-top: 15px;
+  background-color: #fff;
+  color: #000;
+  border-radius: 8px;
+  padding: 15px;
+  max-width: 90%;
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-y: auto;
+  max-height: 400px;
+  position: relative;
+  border: 1px solid #eee;
+}
+
+.errorMessage {
+  margin-bottom: 16px;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.prompt {
+  margin-top: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.loginPromptButton {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: #1572FF;
+  font-size: 21px;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.loginPromptButton:hover {
+  color: #1260d6;
+}
+
+.detailedResult {
+  margin-bottom: 20px;
+}
+
+.detailedResult h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.detailedResult h4 {
+  color: #555;
+  margin: 15px 0 8px 0;
+  font-size: 16px;
+}
+
+.detailedResult p {
+  margin-bottom: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.toggleDetailsButton {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: #1572FF;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 600;
+  padding: 0;
+  font-size: 16px;
+}
+
+.toggleDetailsButton:hover {
+  color: #1260d6;
+}
+
+@media (max-width: 1024px) {
+  .main {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero {
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .checkSection {
+    width: 100%;
+    max-width: 600px;
+  }
+}

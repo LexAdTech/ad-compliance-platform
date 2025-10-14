@@ -1,0 +1,59 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 46px 36px;
+  font-size: 29px;
+  min-width: 260px;
+  text-align: center;
+  box-shadow: 0 3px 32px #ccc;
+  position: relative;
+}
+
+.title {
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: block;
+}
+
+.subtitle {
+  font-weight: 400;
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 8px;
+}
+
+.message {
+  margin-top: 22px;
+  font-size: 20px;
+}
+
+.loginButton {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: #1572FF;
+  font-size: 21px;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.closeButton {
+  position: absolute;
+  top: 13px;
+  right: 17px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
