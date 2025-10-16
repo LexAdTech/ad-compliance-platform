@@ -16,7 +16,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [adText, setAdText] = useState('');
   const [checkResultVisible, setCheckResultVisible] = useState(false);
   const [detailedTextHidden, setDetailedTextHidden] = useState(false);
-  
+
   const { isLoggedIn } = useAuthContext();
 
   const handleCheck = () => {
@@ -32,13 +32,13 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className={styles.container}>
-      <Header 
+      <Header
         currentPage="home"
         onNavigateHome={() => {}} // Пустая функция, так как уже на домашней
         onNavigateArticles={onNavigateArticles}
         onLoginClick={onLoginClick}
       />
-      
+
       <main className={styles.main}>
         <div className={styles.hero}>
           <h1 className={styles.heroTitle}>
@@ -52,7 +52,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
           <SvgIcon className={styles.heroImage} />
         </div>
-        
+
         <section className={styles.checkSection}>
           <div className={styles.checkTitle}>Введите текст вашей рекламы....</div>
           <textarea
@@ -68,14 +68,14 @@ export const HomePage: React.FC<HomePageProps> = ({
           >
             Проверить
           </button>
-          
+
           {checkResultVisible && (
             <div className={styles.result}>
               {!isLoggedIn ? (
                 <>
                   <div className={styles.errorMessage}>
-                    Неправильно! Рекламный текст содержит утверждения, которые не подтверждены 
-                    достоверными научными данными, отсутствует обязательное предупреждение о том, 
+                    Неправильно! Рекламный текст содержит утверждения, которые не подтверждены
+                    достоверными научными данными, отсутствует обязательное предупреждение о том,
                     что продукт не является лекарственным средством, а также неполно раскрыты условия акции.
                   </div>
                   <div className={styles.prompt}>
@@ -94,33 +94,33 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <div className={styles.detailedResult}>
                       <h3>Краткая оценка соответствия рекламы законодательству</h3>
                       <p>
-                        Рекламный текст содержит утверждения, которые не подтверждены достоверными 
-                        клиническими данными, отсутствует обязательное предупреждение о том, что 
+                        Рекламный текст содержит утверждения, которые не подтверждены достоверными
+                        клиническими данными, отсутствует обязательное предупреждение о том, что
                         продукт не является лекарственным средством, а также неполно раскрыты условия акции.
                       </p>
-                      
+
                       <h3>Анализ в разрезе законодательства</h3>
                       <h4>Недостоверная (вводящая в заблуждение) реклама</h4>
                       <p>
-                        Согласно части 1 статьи 5 Федерального закона «О рекламе», реклама должна быть 
+                        Согласно части 1 статьи 5 Федерального закона «О рекламе», реклама должна быть
                         добросовестной и достоверной, не содержать недостоверных сведений о товаре.
                       </p>
-                      
+
                       <h4>Обязательные предупреждения</h4>
                       <p>
-                        Для рекламы продуктов, влияющих на здоровье, в соответствии с пунктом 1 части 1 
-                        и частью 1.1 статьи 25 закона, акцент делается на том, что такие продукты не 
+                        Для рекламы продуктов, влияющих на здоровье, в соответствии с пунктом 1 части 1
+                        и частью 1.1 статьи 25 закона, акцент делается на том, что такие продукты не
                         являются лекарственными средствами.
                       </p>
-                      
+
                       <h4>Информация об акциях и скидках</h4>
                       <p>
                         Объявляя об акциях и скидках, необходимо указывать все существенные условия.
                       </p>
-                      
+
                       <h4>Юридические риски</h4>
                       <p>
-                        Несоблюдение требований законодательства о рекламе может привести к 
+                        Несоблюдение требований законодательства о рекламе может привести к
                         административной ответственности по статье 14.3 КоАП РФ.
                       </p>
                     </div>
@@ -140,3 +140,4 @@ export const HomePage: React.FC<HomePageProps> = ({
     </div>
   );
 };
+
