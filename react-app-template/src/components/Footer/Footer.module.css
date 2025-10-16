@@ -1,0 +1,168 @@
+/* components/Footer/Footer.module.css */
+.footer {
+    background: #2c3e50;
+    color: white;
+    padding: 40px 0 20px;
+    margin-top: auto;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    margin-bottom: 30px;
+}
+
+.logoSection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoImage {
+    width: 40px; /* Чуть меньше чем в хедере для футера */
+    height: 40px;
+    object-fit: contain;
+    user-select: none;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.fox {
+    color: #FF7F32;
+}
+
+.plus {
+    color: #1572FF;
+}
+
+.description {
+    color: #bdc3c7;
+    line-height: 1.5;
+    font-size: 14px;
+    margin: 0;
+}
+
+.linksSection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.linksGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.linksTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: #ecf0f1;
+}
+
+.link {
+    color: #bdc3c7;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.link:hover {
+    color: #1572FF;
+}
+
+.bottomSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #34495e;
+}
+
+.copyright {
+    color: #95a5a6;
+    font-size: 14px;
+}
+
+.contacts {
+    display: flex;
+    gap: 20px;
+}
+
+.contact {
+    color: #bdc3c7;
+    font-size: 14px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .linksSection {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .bottomSection {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .contacts {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .logoImage {
+        width: 35px;
+        height: 35px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer {
+        padding: 30px 0 15px;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .content {
+        gap: 30px;
+    }
+
+    .logoImage {
+        width: 30px;
+        height: 30px;
+    }
+
+    .title {
+        font-size: 18px;
+    }
+}
