@@ -1,3 +1,30 @@
+/*.app {*/
+/*  min-height: 100vh;*/
+/*  font-family: 'Montserrat', Arial, sans-serif;*/
+/*}*/
+
+/*!* Общие стили для всего приложения *!*/
+/** {*/
+/*  box-sizing: border-box;*/
+/*}*/
+
+/*body {*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  background: linear-gradient(to bottom right, #faf8f1 60%, #fff 100%);*/
+/*}*/
+
+/*!* Сброс стилей для кнопок *!*/
+
+/*button {*/
+/*  font-family: inherit;*/
+/*}*/
+
+/*input, textarea {*/
+/*  font-family: inherit;*/
+/*}*/
+
+/* App.module.css */
 .app {
   min-height: 100vh;
   font-family: 'Montserrat', Arial, sans-serif;
@@ -12,14 +39,37 @@ body {
   margin: 0;
   padding: 0;
   background: linear-gradient(to bottom right, #faf8f1 60%, #fff 100%);
+  font-family: 'Montserrat', Arial, sans-serif;
+  color: #444;
+  line-height: 1.6;
 }
 
 /* Сброс стилей для кнопок */
-
 button {
   font-family: inherit;
+  font-size: 16px;
 }
 
 input, textarea {
   font-family: inherit;
+}
+
+/* Общие стили для контейнеров */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Цветовая схема */
+:root {
+  --primary-orange: #FF7F32;
+  --primary-blue: #1572FF;
+  --text-dark: #2c3e50;
+  --text-gray: #7f8c8d;
+  --text-light: #95a5a6;
+  --background-light: #faf8f1;
+  --border-color: #ecf0f1;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
