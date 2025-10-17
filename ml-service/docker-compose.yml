@@ -1,19 +1,33 @@
-version: '3.8'
-
 services:
   text-analyzer:
-    build: ./text-analyzer
+    build: 
+      context: ./text-analyzer
+      dockerfile: Dockerfile
     ports:
       - "8001:8000"
     volumes:
       - ./models:/app/models
+    environment:
+      - TRANSFORMERS_CACHE=/app/models
+      - HF_HOME=/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
 
   image-analyzer:
-    build: ./image-analyzer
+    build:
+      context: ./image-analyzer
+      dockerfile: Dockerfile
     ports:
       - "8002:8000"
     volumes:
       - ./models:/app/models
-
-
-
+    environment:
+      - TRANSFORMERS_CACHE=/app/models
+      - HF_HOME=/app/models
+    restart: unless-stopped
