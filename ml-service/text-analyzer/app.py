@@ -40,7 +40,9 @@ try:
         model_path,
         torch_dtype=torch.float16,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=True,
+        # load_in_8bit=True,
+        low_cpu_mem_usage=True
     )
     print(f"Model loaded successfully on device: {model.device}")
 except Exception as e:
@@ -70,7 +72,7 @@ async def analyze_text(request: TextRequest):
         
         outputs = model.generate(
             **inputs,
-            max_new_tokens=50,
+            max_new_tokens=512,
             do_sample=True,
             temperature=0.7,
             top_p=0.9,
