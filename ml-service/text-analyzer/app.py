@@ -70,7 +70,7 @@ async def analyze_text(request: TextRequest):
         
         outputs = model.generate(
             **inputs,
-            max_new_tokens=512,
+            max_new_tokens=50,
             do_sample=True,
             temperature=0.7,
             top_p=0.9,
@@ -86,8 +86,8 @@ async def analyze_text(request: TextRequest):
     except Exception as e:
         return {"error": str(e)}
 
-@app.get("/health")
-async def health_check():
+@app.get("/service_check")
+async def service_check():
     return {"status": "ready"}
 
 if __name__ == "__main__":

@@ -1,0 +1,104 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  min-width: 350px;
+  padding: 36px;
+  position: relative;
+  box-shadow: 0 6px 22px 0px #eee;
+}
+
+.closeButton {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  background: none;
+  border: none;
+  font-size: 27px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  text-align: center;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 28px;
+}
+
+.input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  font-size: 17px;
+  font-family: inherit;
+}
+
+.submitButton {
+  background: #1572FF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 19px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background: #1260d6;
+}
+
+.submitButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+}
+
+.switchMode {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+.switchButton {
+  border: none;
+  background: none;
+  color: #1572FF;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: underline;
+}
+
+.switchButton:hover {
+  color: #1260d6;
+}
