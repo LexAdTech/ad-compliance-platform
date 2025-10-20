@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Header } from '../../components/Header/Header';
-import  SvgIcon  from '../../components/Common/SvgIcon';
+import SvgIcon from '../../components/Common/SvgIcon';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { adAnalysisService } from '../../services/adAnalysisService';
 import styles from './HomePage.module.css';
-//fasd
+
 interface HomePageProps {
   onNavigateArticles: () => void;
   onLoginClick: () => void;
@@ -16,13 +17,49 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [adText, setAdText] = useState('');
   const [checkResultVisible, setCheckResultVisible] = useState(false);
   const [detailedTextHidden, setDetailedTextHidden] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { isLoggedIn } = useAuthContext();
 
-  const handleCheck = () => {
-    if (adText.trim()) {
+  // В функции handleCheck добавляем проверку авторизации
+  const handleCheck = async () => {
+    if (!adText.trim()) {
+      setError('Введите текст рекламы для проверки');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setCheckResultVisible(false);
+
+    try {
+      console.log('Starting analysis...');
+      
+      // Добавляем параметр для типа отчета
+      const result = await adAnalysisService.analyzeAdText(
+        adText, 
+        isLoggedIn ? 'full' : 'short' // Отправляем тип отчета
+      );
+      
+      console.log('Analysis completed:', result);
+      
+      setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
       setCheckResultVisible(true);
       setDetailedTextHidden(false);
+    } catch (err: unknown) {
+      console.error('Analysis error:', err);
+      
+      if (err instanceof Error) {
+        setError(`Ошибка: ${err.message}`);
+      } else {
+        setError('Неизвестная ошибка при анализе текста');
+      }
+      
+      setCheckResultVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,7 +71,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     <div className={styles.container}>
       <Header
         currentPage="home"
-        onNavigateHome={() => {}} // Пустая функция, так как уже на домашней
+        onNavigateHome={() => {}}
         onNavigateArticles={onNavigateArticles}
         onLoginClick={onLoginClick}
       />
@@ -61,22 +98,37 @@ export const HomePage: React.FC<HomePageProps> = ({
             rows={5}
             className={styles.textarea}
             placeholder="Введите текст рекламы для проверки..."
+            disabled={loading}
           />
+          
           <button
             onClick={handleCheck}
             className={styles.checkButton}
+            disabled={loading}
           >
-            Проверить
+            {loading ? 'Анализ...' : 'Проверить'}
           </button>
 
-          {checkResultVisible && (
+          {loading && (
+            <div className={styles.result}>
+              <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                Идет анализ рекламы...
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className={styles.result}>
+              <div className={styles.errorMessage}>{error}</div>
+            </div>
+          )}
+
+          {checkResultVisible && analysisResult && (
             <div className={styles.result}>
               {!isLoggedIn ? (
                 <>
                   <div className={styles.errorMessage}>
-                    Неправильно! Рекламный текст содержит утверждения, которые не подтверждены
-                    достоверными научными данными, отсутствует обязательное предупреждение о том,
-                    что продукт не является лекарственным средством, а также неполно раскрыты условия акции.
+                    {analysisResult}
                   </div>
                   <div className={styles.prompt}>
                     Хотите узнать подробнее?
@@ -92,37 +144,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <>
                   {!detailedTextHidden && (
                     <div className={styles.detailedResult}>
-                      <h3>Краткая оценка соответствия рекламы законодательству</h3>
-                      <p>
-                        Рекламный текст содержит утверждения, которые не подтверждены достоверными
-                        клиническими данными, отсутствует обязательное предупреждение о том, что
-                        продукт не является лекарственным средством, а также неполно раскрыты условия акции.
-                      </p>
-
-                      <h3>Анализ в разрезе законодательства</h3>
-                      <h4>Недостоверная (вводящая в заблуждение) реклама</h4>
-                      <p>
-                        Согласно части 1 статьи 5 Федерального закона «О рекламе», реклама должна быть
-                        добросовестной и достоверной, не содержать недостоверных сведений о товаре.
-                      </p>
-
-                      <h4>Обязательные предупреждения</h4>
-                      <p>
-                        Для рекламы продуктов, влияющих на здоровье, в соответствии с пунктом 1 части 1
-                        и частью 1.1 статьи 25 закона, акцент делается на том, что такие продукты не
-                        являются лекарственными средствами.
-                      </p>
-
-                      <h4>Информация об акциях и скидках</h4>
-                      <p>
-                        Объявляя об акциях и скидках, необходимо указывать все существенные условия.
-                      </p>
-
-                      <h4>Юридические риски</h4>
-                      <p>
-                        Несоблюдение требований законодательства о рекламе может привести к
-                        административной ответственности по статье 14.3 КоАП РФ.
-                      </p>
+                      <h3>Результат анализа:</h3>
+                      <p>{analysisResult}</p>
                     </div>
                   )}
                   <button
@@ -140,4 +163,3 @@ export const HomePage: React.FC<HomePageProps> = ({
     </div>
   );
 };
-

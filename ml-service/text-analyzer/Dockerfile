@@ -1,6 +1,13 @@
-FROM python:3.9-slim
+FROM pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+
 WORKDIR /app
+
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir transformers>=4.40.0
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY app.py .
+
 CMD ["python", "app.py"]
