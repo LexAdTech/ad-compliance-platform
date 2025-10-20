@@ -16,9 +16,9 @@ public class AdAnalyzerClient {
         this.objectMapper = new ObjectMapper();
     }
 
-    public String analyzeAdText(String adText) {
+    public String analyzeAdText(String adText, String reportType) {
         try {
-            AnalysisRequest request = new AnalysisRequest(adText);
+            AnalysisRequest request = new AnalysisRequest(adText, reportType);
             String requestBody = objectMapper.writeValueAsString(request);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()

@@ -629,7 +629,10 @@ package com.konsultantplus.project.adanalyzer.advertisementanalyzer.controller;
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.analizer.AdAnalyzerClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/analyze")
@@ -644,8 +647,13 @@ public class AnalysisController {
 
     @Operation(summary = "Анализ рекламного текста", description = "Отправляет рекламный текст на анализ и возвращает результат")
     @PostMapping
-    public String analyzeAdvertisement(@RequestBody String adText) {
-        return adAnalyzerClient.analyzeAdText(adText);
+    public ResponseEntity<?> analyzeAdvertisement(@RequestBody String adText) {
+        try {
+            String result = adAnalyzerClient.analyzeAdText(adText);
+            return ResponseEntity.ok().body(Map.of("analysis", result));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Ошибка анализа: " + e.getMessage()));
+        }
     }
 }
 
