@@ -1,0 +1,183 @@
+/* components/Articles/ArticleDetail.module.css */
+.articleDetail {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.backButton {
+    background: none;
+    border: 1px solid #ddd;
+    color: #444;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    margin-bottom: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+}
+
+.backButton:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+    color: #1572FF;
+}
+
+.article {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.article::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #FF7F32, #1572FF);
+    border-radius: 12px 12px 0 0;
+}
+
+.header {
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.title {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.meta {
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.date {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.date::before {
+    content: '📅';
+    font-size: 14px;
+}
+
+.content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #34495e;
+}
+
+/* Стили для Markdown контента */
+.content h1 {
+    font-size: 1.8rem;
+    margin: 35px 0 20px;
+    color: #2c3e50;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.content h2 {
+    font-size: 1.5rem;
+    margin: 30px 0 15px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.content h3 {
+    font-size: 1.3rem;
+    margin: 25px 0 12px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.content p {
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.content ul, .content ol {
+    margin-bottom: 20px;
+    padding-left: 30px;
+}
+
+.content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.content blockquote {
+    border-left: 4px solid #1572FF;
+    padding: 20px 25px;
+    margin: 25px 0;
+    font-style: italic;
+    color: #7f8c8d;
+    background: #f8f9fa;
+    border-radius: 0 8px 8px 0;
+}
+
+.content code {
+    background: #f8f9fa;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    border: 1px solid #e1e4e8;
+}
+
+.content pre {
+    background: #2c3e50;
+    color: white;
+    padding: 25px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 25px 0;
+    border-left: 4px solid #FF7F32;
+}
+
+.content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+}
+
+.content a {
+    color: #1572FF;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.content a:hover {
+    color: #FF7F32;
+    text-decoration: underline;
+}
+
+.content strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.content em {
+    color: #7f8c8d;
+    font-style: italic;
+}

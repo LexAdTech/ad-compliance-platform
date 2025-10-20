@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  min-width: 400px;
+  padding: 40px 36px;
+  position: relative;
+  box-shadow: 0 6px 22px 0px #eee;
+  text-align: center;
+}
+
+.closeButton {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  background: none;
+  border: none;
+  font-size: 27px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+.icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.title {
+  text-align: center;
+  margin: 0 0 16px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.message {
+  text-align: center;
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.registerButton {
+  background: #1572FF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.registerButton:hover {
+  background: #1260d6;
+}
+
+.loginButton {
+  background: #fff;
+  color: #1572FF;
+  border: 1px solid #1572FF;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.loginButton:hover {
+  background: #f0f7ff;
+}
+
+.note {
+  text-align: center;
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.loginLink {
+  background: none;
+  border: none;
+  color: #1572FF;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  padding: 0;
+}
+
+.loginLink:hover {
+  color: #1260d6;
+}
