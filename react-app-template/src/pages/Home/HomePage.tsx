@@ -23,6 +23,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   const { isLoggedIn } = useAuthContext();
 
+  // В функции handleCheck добавляем проверку авторизации
   const handleCheck = async () => {
     if (!adText.trim()) {
       setError('Введите текст рекламы для проверки');
@@ -35,7 +36,13 @@ export const HomePage: React.FC<HomePageProps> = ({
 
     try {
       console.log('Starting analysis...');
-      const result = await adAnalysisService.analyzeAdText(adText);
+      
+      // Добавляем параметр для типа отчета
+      const result = await adAnalysisService.analyzeAdText(
+        adText, 
+        isLoggedIn ? 'full' : 'short' // Отправляем тип отчета
+      );
+      
       console.log('Analysis completed:', result);
       
       setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
@@ -44,7 +51,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     } catch (err: unknown) {
       console.error('Analysis error:', err);
       
-      // Правильная обработка ошибок
       if (err instanceof Error) {
         setError(`Ошибка: ${err.message}`);
       } else {

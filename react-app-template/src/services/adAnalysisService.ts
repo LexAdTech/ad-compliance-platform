@@ -6,19 +6,26 @@ export interface AnalysisResult {
 }
 
 export const adAnalysisService = {
-    async analyzeAdText(text: string): Promise<AnalysisResult> {
+    async analyzeAdText(text: string, reportType: 'short' | 'full' = 'short'): Promise<AnalysisResult> {
         try {
             const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
             
             console.log('Sending text to analysis:', text);
+            console.log('Report type:', reportType);
             console.log('API URL:', `${API_BASE_URL}/api/analyze`);
             
+            // Создаем объект с текстом и типом отчета
+            const requestBody = JSON.stringify({
+                text: text,
+                report_type: reportType
+            });
+
             const response = await fetch(`${API_BASE_URL}/api/analyze`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'text/plain',
+                    'Content-Type': 'application/json',
                 },
-                body: text,
+                body: requestBody,
             });
 
             console.log('Response status:', response.status);
