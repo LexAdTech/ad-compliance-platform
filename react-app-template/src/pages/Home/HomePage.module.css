@@ -249,3 +249,77 @@
     font-size: 14px;
   }
 }
+
+/* Стили для заголовка результата с кнопкой PDF */
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.resultHeader h3 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.3rem;
+}
+
+/* Кнопка экспорта PDF */
+.exportPdfButton {
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.exportPdfButton:hover:not(:disabled) {
+  background: #e6692b;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.exportPdfButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Контейнер для действий с результатом */
+.resultActions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .resultHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resultActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exportPdfButton,
+  .toggleDetailsButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

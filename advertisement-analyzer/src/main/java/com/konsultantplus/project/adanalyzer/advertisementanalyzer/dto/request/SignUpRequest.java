@@ -1,6 +1,5 @@
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.dto.request;
 
-import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
