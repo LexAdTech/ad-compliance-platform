@@ -1,6 +1,6 @@
 // components/Articles/ArticleList.tsx
 import React from 'react';
-import { Article } from '../../services/ArticleService';
+import { Article } from '../../types';
 import styles from './ArticleList.module.css';
 
 interface ArticleListProps {
