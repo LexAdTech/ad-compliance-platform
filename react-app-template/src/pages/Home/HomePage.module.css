@@ -102,7 +102,7 @@
   background-color: #fff;
   color: #000;
   border-radius: 8px;
-  padding: 15px;
+  padding: 20px;
   max-width: 90%;
   font-size: 16px;
   line-height: 1.4;
@@ -112,16 +112,40 @@
   border: 1px solid #eee;
 }
 
+/* Стили для полного отчета (авторизованные пользователи) */
+.detailedResult {
+  margin-bottom: 20px;
+}
+
+.detailedResult h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.detailedResult p {
+  margin-bottom: 12px;
+  color: #34495e;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* Стили для краткого отчета (неавторизованные пользователи) */
 .errorMessage {
   margin-bottom: 16px;
   color: #d32f2f;
   font-weight: 500;
+  line-height: 1.5;
+  white-space: pre-line;
 }
 
 .prompt {
   margin-top: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 12px;
 }
 
 .loginPromptButton {
@@ -129,7 +153,7 @@
   background: none;
   border: none;
   color: #1572FF;
-  font-size: 21px;
+  font-size: 16px;
   cursor: pointer;
   font-weight: 700;
   text-decoration: underline;
@@ -138,28 +162,6 @@
 
 .loginPromptButton:hover {
   color: #1260d6;
-}
-
-.detailedResult {
-  margin-bottom: 20px;
-}
-
-.detailedResult h3 {
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 18px;
-}
-
-.detailedResult h4 {
-  color: #555;
-  margin: 15px 0 8px 0;
-  font-size: 16px;
-}
-
-.detailedResult p {
-  margin-bottom: 12px;
-  color: #666;
-  line-height: 1.5;
 }
 
 .toggleDetailsButton {
@@ -171,13 +173,38 @@
   text-decoration: underline;
   font-weight: 600;
   padding: 0;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .toggleDetailsButton:hover {
   color: #1260d6;
 }
 
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+/* Улучшаем отображение текста в textarea */
+.textarea {
+  font-size: 16px;
+  resize: none;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 12px;
+  width: 90%;
+  margin-bottom: 16px;
+  font-family: inherit;
+  min-height: 120px;
+  line-height: 1.4;
+}
+
+/* Адаптивность для мобильных устройств */
 @media (max-width: 1024px) {
   .main {
     flex-direction: column;
@@ -192,6 +219,107 @@
   .checkSection {
     width: 100%;
     max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .result {
+    padding: 15px;
+    max-width: 95%;
+    font-size: 14px;
+  }
+  
+  .detailedResult h3 {
+    font-size: 16px;
+  }
+  
+  .prompt {
+    font-size: 14px;
+  }
+  
+  .loginPromptButton {
+    font-size: 14px;
+  }
+  
+  .errorMessage {
+    font-size: 14px;
+  }
+  
+  .detailedResult p {
+    font-size: 14px;
+  }
+}
+
+/* Стили для заголовка результата с кнопкой PDF */
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.resultHeader h3 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.3rem;
+}
+
+/* Кнопка экспорта PDF */
+.exportPdfButton {
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.exportPdfButton:hover:not(:disabled) {
+  background: #e6692b;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.exportPdfButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Контейнер для действий с результатом */
+.resultActions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .resultHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resultActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exportPdfButton,
+  .toggleDetailsButton {
+    width: 100%;
+    justify-content: center;
   }
 }
 

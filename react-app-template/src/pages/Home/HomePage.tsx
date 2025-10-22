@@ -1,28 +1,249 @@
+// import React, { useState } from 'react';
+// import { Header } from '../../components/Header/Header';
+// import SvgIcon from '../../components/Common/SvgIcon';
+// import { useAuthContext } from '../../contexts/AuthContext';
+// import { adAnalysisService } from '../../services/adAnalysisService';
+// import styles from './HomePage.module.css';
+//
+// interface HomePageProps {
+//   onNavigateArticles: () => void;
+//   onLoginClick: () => void;
+// }
+//
+// export const HomePage: React.FC<HomePageProps> = ({
+//   onNavigateArticles,
+//   onLoginClick,
+// }) => {
+//   const [adText, setAdText] = useState('');
+//   const [checkResultVisible, setCheckResultVisible] = useState(false);
+//   const [detailedTextHidden, setDetailedTextHidden] = useState(false);
+//   const [analysisResult, setAnalysisResult] = useState<string>('');
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//
+//   const { isLoggedIn } = useAuthContext();
+//
+//   // В функции handleCheck добавляем проверку авторизации
+//   const handleCheck = async () => {
+//     if (!adText.trim()) {
+//       setError('Введите текст рекламы для проверки');
+//       return;
+//     }
+//
+//     setLoading(true);
+//     setError(null);
+//     setCheckResultVisible(false);
+//
+//     try {
+//       console.log('Starting analysis...');
+//
+//       // Добавляем параметр для типа отчета
+//       const result = await adAnalysisService.analyzeAdText(
+//         adText,
+//         isLoggedIn ? 'full' : 'short' // Отправляем тип отчета
+//       );
+//
+//       console.log('Analysis completed:', result);
+//
+//       setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
+//       setCheckResultVisible(true);
+//       setDetailedTextHidden(false);
+//     } catch (err: unknown) {
+//       console.error('Analysis error:', err);
+//
+//       if (err instanceof Error) {
+//         setError(`Ошибка: ${err.message}`);
+//       } else {
+//         setError('Неизвестная ошибка при анализе текста');
+//       }
+//
+//       setCheckResultVisible(true);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+//
+//   const handleDetailedResultLogin = () => {
+//     onLoginClick();
+//   };
+//
+//   return (
+//     <div className={styles.container}>
+//       <Header
+//         currentPage="home"
+//         onNavigateHome={() => {}}
+//         onNavigateArticles={onNavigateArticles}
+//         onLoginClick={onLoginClick}
+//       />
+//
+//       <main className={styles.main}>
+//         <div className={styles.hero}>
+//           <h1 className={styles.heroTitle}>
+//             Фокс<span className={styles.blue}>Плюс</span>: юридические{' '}
+//             <span className={styles.orange}>рекомендации</span> по рекламе
+//           </h1>
+//           <p className={styles.heroDescription}>
+//             Сервис для быстрой проверки рекламы на соответствие закону. Мы анализируем текст,
+//             изображения и аудио с помощью высокотехнологичного алгоритма, находим риски и
+//             подсказываем, как их исправить. С нами ваша реклама под защитой!
+//           </p>
+//           <SvgIcon className={styles.heroImage} />
+//         </div>
+//
+//         <section className={styles.checkSection}>
+//           <div className={styles.checkTitle}>Введите текст вашей рекламы....</div>
+//           <textarea
+//             value={adText}
+//             onChange={(e) => setAdText(e.target.value)}
+//             rows={5}
+//             className={styles.textarea}
+//             placeholder="Введите текст рекламы для проверки..."
+//             disabled={loading}
+//           />
+//
+//           <button
+//             onClick={handleCheck}
+//             className={styles.checkButton}
+//             disabled={loading}
+//           >
+//             {loading ? 'Анализ...' : 'Проверить'}
+//           </button>
+//
+//           {loading && (
+//             <div className={styles.result}>
+//               <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+//                 Идет анализ рекламы...
+//               </div>
+//             </div>
+//           )}
+//
+//           {error && (
+//             <div className={styles.result}>
+//               <div className={styles.errorMessage}>{error}</div>
+//             </div>
+//           )}
+//
+//           {checkResultVisible && analysisResult && (
+//             <div className={styles.result}>
+//               {!isLoggedIn ? (
+//                 <>
+//                   <div className={styles.errorMessage}>
+//                     {analysisResult}
+//                   </div>
+//                   <div className={styles.prompt}>
+//                     Хотите узнать подробнее?
+//                   </div>
+//                   <button
+//                     onClick={handleDetailedResultLogin}
+//                     className={styles.loginPromptButton}
+//                   >
+//                     Войти
+//                   </button>
+//                 </>
+//               ) : (
+//                 <>
+//                   {!detailedTextHidden && (
+//                     <div className={styles.detailedResult}>
+//                       <h3>Результат анализа:</h3>
+//                       <p>{analysisResult}</p>
+//                     </div>
+//                   )}
+//                   <button
+//                     onClick={() => setDetailedTextHidden(!detailedTextHidden)}
+//                     className={styles.toggleDetailsButton}
+//                   >
+//                     {detailedTextHidden ? 'Показать подробности' : 'Скрыть'}
+//                   </button>
+//                 </>
+//               )}
+//             </div>
+//           )}
+//         </section>
+//       </main>
+//     </div>
+//   );
+// };
+
+
+// pages/Home/HomePage.tsx
 import React, { useState } from 'react';
 import { Header } from '../../components/Header/Header';
-import  SvgIcon  from '../../components/Common/SvgIcon';
+import SvgIcon from '../../components/Common/SvgIcon';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { adAnalysisService } from '../../services/adAnalysisService';
+import { usePdfExport } from '../../hooks/usePdfExport';
 import styles from './HomePage.module.css';
-//fasd
+
 interface HomePageProps {
   onNavigateArticles: () => void;
   onLoginClick: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
-  onNavigateArticles,
-  onLoginClick,
-}) => {
+                                                    onNavigateArticles,
+                                                    onLoginClick,
+                                                  }) => {
   const [adText, setAdText] = useState('');
   const [checkResultVisible, setCheckResultVisible] = useState(false);
   const [detailedTextHidden, setDetailedTextHidden] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { isLoggedIn } = useAuthContext();
+  const { exportAnalysisToPdf, isGenerating } = usePdfExport();
 
-  const handleCheck = () => {
-    if (adText.trim()) {
+  // Функция для экспорта в PDF
+  const handleExportPdf = async () => {
+    if (!analysisResult || !adText.trim()) return;
+
+    try {
+      await exportAnalysisToPdf({
+        title: `Анализ рекламного текста - ${new Date().toLocaleDateString('ru-RU')}`,
+        originalText: adText,
+        analysis: analysisResult,
+        reportType: isLoggedIn ? 'full' : 'short'
+      });
+    } catch (err) {
+      setError('Ошибка при создании PDF');
+    }
+  };
+
+  const handleCheck = async () => {
+    if (!adText.trim()) {
+      setError('Введите текст рекламы для проверки');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setCheckResultVisible(false);
+
+    try {
+      console.log('Starting analysis...');
+
+      const result = await adAnalysisService.analyzeAdText(
+          adText,
+          isLoggedIn ? 'full' : 'short'
+      );
+
+      console.log('Analysis completed:', result);
+
+      setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
       setCheckResultVisible(true);
       setDetailedTextHidden(false);
+    } catch (err: unknown) {
+      console.error('Analysis error:', err);
+
+      if (err instanceof Error) {
+        setError(`Ошибка: ${err.message}`);
+      } else {
+        setError('Неизвестная ошибка при анализе текста');
+      }
+
+      setCheckResultVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,113 +252,118 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   return (
-    <div className={styles.container}>
-      <Header
-        currentPage="home"
-        onNavigateHome={() => {}} // Пустая функция, так как уже на домашней
-        onNavigateArticles={onNavigateArticles}
-        onLoginClick={onLoginClick}
-      />
+      <div className={styles.container}>
+        <Header
+            currentPage="home"
+            onNavigateHome={() => {}}
+            onNavigateArticles={onNavigateArticles}
+            onLoginClick={onLoginClick}
+        />
 
-      <main className={styles.main}>
-        <div className={styles.hero}>
-          <h1 className={styles.heroTitle}>
-            Фокс<span className={styles.blue}>Плюс</span>: юридические{' '}
-            <span className={styles.orange}>рекомендации</span> по рекламе
-          </h1>
-          <p className={styles.heroDescription}>
-            Сервис для быстрой проверки рекламы на соответствие закону. Мы анализируем текст,
-            изображения и аудио с помощью высокотехнологичного алгоритма, находим риски и
-            подсказываем, как их исправить. С нами ваша реклама под защитой!
-          </p>
-          <SvgIcon className={styles.heroImage} />
-        </div>
+        <main className={styles.main}>
+          <div className={styles.hero}>
+            <h1 className={styles.heroTitle}>
+              Фокс<span className={styles.blue}>Плюс</span>: юридические{' '}
+              <span className={styles.orange}>рекомендации</span> по рекламе
+            </h1>
+            <p className={styles.heroDescription}>
+              Сервис для быстрой проверки рекламы на соответствие закону. Мы анализируем текст,
+              изображения и аудио с помощью высокотехнологичного алгоритма, находим риски и
+              подсказываем, как их исправить. С нами ваша реклама под защитой!
+            </p>
+            <SvgIcon className={styles.heroImage} />
+          </div>
 
-        <section className={styles.checkSection}>
-          <div className={styles.checkTitle}>Введите текст вашей рекламы....</div>
-          <textarea
-            value={adText}
-            onChange={(e) => setAdText(e.target.value)}
-            rows={5}
-            className={styles.textarea}
-            placeholder="Введите текст рекламы для проверки..."
-          />
-          <button
-            onClick={handleCheck}
-            className={styles.checkButton}
-          >
-            Проверить
-          </button>
+          <section className={styles.checkSection}>
+            <div className={styles.checkTitle}>Введите текст вашей рекламы....</div>
+            <textarea
+                value={adText}
+                onChange={(e) => setAdText(e.target.value)}
+                rows={5}
+                className={styles.textarea}
+                placeholder="Введите текст рекламы для проверки..."
+                disabled={loading}
+            />
 
-          {checkResultVisible && (
-            <div className={styles.result}>
-              {!isLoggedIn ? (
-                <>
-                  <div className={styles.errorMessage}>
-                    Неправильно! Рекламный текст содержит утверждения, которые не подтверждены
-                    достоверными научными данными, отсутствует обязательное предупреждение о том,
-                    что продукт не является лекарственным средством, а также неполно раскрыты условия акции.
+            <button
+                onClick={handleCheck}
+                className={styles.checkButton}
+                disabled={loading}
+            >
+              {loading ? 'Анализ...' : 'Проверить'}
+            </button>
+
+            {loading && (
+                <div className={styles.result}>
+                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                    Идет анализ рекламы...
                   </div>
-                  <div className={styles.prompt}>
-                    Хотите узнать подробнее?
-                  </div>
-                  <button
-                    onClick={handleDetailedResultLogin}
-                    className={styles.loginPromptButton}
-                  >
-                    Войти
-                  </button>
-                </>
-              ) : (
-                <>
-                  {!detailedTextHidden && (
-                    <div className={styles.detailedResult}>
-                      <h3>Краткая оценка соответствия рекламы законодательству</h3>
-                      <p>
-                        Рекламный текст содержит утверждения, которые не подтверждены достоверными
-                        клиническими данными, отсутствует обязательное предупреждение о том, что
-                        продукт не является лекарственным средством, а также неполно раскрыты условия акции.
-                      </p>
+                </div>
+            )}
 
-                      <h3>Анализ в разрезе законодательства</h3>
-                      <h4>Недостоверная (вводящая в заблуждение) реклама</h4>
-                      <p>
-                        Согласно части 1 статьи 5 Федерального закона «О рекламе», реклама должна быть
-                        добросовестной и достоверной, не содержать недостоверных сведений о товаре.
-                      </p>
+            {error && (
+                <div className={styles.result}>
+                  <div className={styles.errorMessage}>{error}</div>
+                </div>
+            )}
 
-                      <h4>Обязательные предупреждения</h4>
-                      <p>
-                        Для рекламы продуктов, влияющих на здоровье, в соответствии с пунктом 1 части 1
-                        и частью 1.1 статьи 25 закона, акцент делается на том, что такие продукты не
-                        являются лекарственными средствами.
-                      </p>
-
-                      <h4>Информация об акциях и скидках</h4>
-                      <p>
-                        Объявляя об акциях и скидках, необходимо указывать все существенные условия.
-                      </p>
-
-                      <h4>Юридические риски</h4>
-                      <p>
-                        Несоблюдение требований законодательства о рекламе может привести к
-                        административной ответственности по статье 14.3 КоАП РФ.
-                      </p>
-                    </div>
+            {checkResultVisible && analysisResult && (
+                <div className={styles.result}>
+                  {!isLoggedIn ? (
+                      <>
+                        <div className={styles.errorMessage}>
+                          {analysisResult}
+                        </div>
+                        <div className={styles.prompt}>
+                          Хотите узнать подробнее?
+                        </div>
+                        <button
+                            onClick={handleDetailedResultLogin}
+                            className={styles.loginPromptButton}
+                        >
+                          Войти
+                        </button>
+                      </>
+                  ) : (
+                      <>
+                        {!detailedTextHidden && (
+                            <div className={styles.detailedResult}>
+                              <div className={styles.resultHeader}>
+                                <h3>Результат анализа:</h3>
+                                <button
+                                    onClick={handleExportPdf}
+                                    disabled={isGenerating}
+                                    className={styles.exportPdfButton}
+                                >
+                                  {isGenerating ? 'Создание...' : '📥 PDF'}
+                                </button>
+                              </div>
+                              <p>{analysisResult}</p>
+                            </div>
+                        )}
+                        <div className={styles.resultActions}>
+                          <button
+                              onClick={() => setDetailedTextHidden(!detailedTextHidden)}
+                              className={styles.toggleDetailsButton}
+                          >
+                            {detailedTextHidden ? 'Показать подробности' : 'Скрыть'}
+                          </button>
+                          {detailedTextHidden && (
+                              <button
+                                  onClick={handleExportPdf}
+                                  disabled={isGenerating}
+                                  className={styles.exportPdfButton}
+                              >
+                                {isGenerating ? 'Создание PDF...' : '📥 Скачать PDF'}
+                              </button>
+                          )}
+                        </div>
+                      </>
                   )}
-                  <button
-                    onClick={() => setDetailedTextHidden(!detailedTextHidden)}
-                    className={styles.toggleDetailsButton}
-                  >
-                    {detailedTextHidden ? 'Показать подробности' : 'Скрыть'}
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
+                </div>
+            )}
+          </section>
+        </main>
+      </div>
   );
 };
-

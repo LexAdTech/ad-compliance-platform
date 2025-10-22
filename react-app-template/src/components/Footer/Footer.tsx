@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
                     </div>
                     <div className={styles.contacts}>
                         <span className={styles.contact}>contact@foxplus.ru</span>
-                        <span className={styles.contact}>+7 (999) 123-45-67</span>
+                        <span className={styles.contact}>+7 (999) 999-99-99</span>
                     </div>
                 </div>
             </div>

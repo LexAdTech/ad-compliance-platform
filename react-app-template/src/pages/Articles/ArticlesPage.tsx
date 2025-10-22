@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Header } from '../../components/Header/Header';
 import { ArticleList } from '../../components/Articles/ArticleList';
 import { ArticleDetail } from '../../components/Articles/ArticleDetail';
-import { articleService, Article } from '../../services/ArticleService';
+import { ArticleService, Article } from '../../services/ArticleService';
 import styles from './ArticlesPage.module.css';
 
 interface ArticlesPageProps {
@@ -29,7 +29,7 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
             try {
                 setLoading(true);
                 setError(null);
-                const articlesData = await articleService.getArticles();
+                const articlesData = await ArticleService.getArticles();
                 setArticles(articlesData);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load articles');
@@ -45,7 +45,7 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
     const handleArticleClick = async (articleId: string) => {
         try {
             setLoading(true);
-            const article = await articleService.getArticleById(articleId);
+            const article = await ArticleService.getArticleById(articleId);
             setCurrentArticle(article);
             setViewMode('detail');
         } catch (err) {
