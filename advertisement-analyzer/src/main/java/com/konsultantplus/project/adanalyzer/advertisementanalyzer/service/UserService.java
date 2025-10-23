@@ -80,7 +80,7 @@ public class UserService implements UserDetailsService {
         user.setEmail(signUpRequest.getEmail());
         user.setRole(defaultRole);
         userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(signUpRequest.toString());
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     public ResponseEntity<?> signIn(@RequestBody SignInRequest signInRequest) {

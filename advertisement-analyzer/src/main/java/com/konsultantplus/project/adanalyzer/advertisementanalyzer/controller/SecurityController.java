@@ -29,7 +29,7 @@ public class SecurityController {
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
         return userService.signUp(signUpRequest);
     }
-
+//wfe
     @SecurityDocs.SignInOperation
     @PostMapping("/signin")
     ResponseEntity<?> signIn(@RequestBody SignInRequest signInRequest){
