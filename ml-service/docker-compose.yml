@@ -45,12 +45,9 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    # Добавляем зависимости для ffmpeg (нужен для pydub)
     environment:
       - PYTHONUNBUFFERED=1
-    # Убедитесь, что в Dockerfile установлены необходимые пакеты
 
-# Добавляем сеть для связи между сервисами
 networks:
   app-network:
     driver: bridge

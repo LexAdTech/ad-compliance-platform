@@ -1,10 +1,8 @@
-// services/ArticleService.ts
 import { Article } from '../types';
 
 export class ArticleService {
     private static readonly API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-    // Генерация excerpt из Markdown
     private static generateExcerpt(markdown: string, length: number = 150): string {
         const plainText = markdown
             .replace(/[#*`\[\]()!]/g, '')
@@ -17,7 +15,6 @@ export class ArticleService {
             : plainText;
     }
 
-    // Получение всех статей - ИСПРАВЛЕНО: добавлен слеш
     static async getArticles(): Promise<Article[]> {
         try {
             console.log('Fetching articles from:', `${this.API_BASE_URL}/articles/`);
@@ -45,7 +42,6 @@ export class ArticleService {
         }
     }
 
-    // Получение статьи по ID - ИСПРАВЛЕНО: убран лишний /api
     static async getArticleById(id: string): Promise<Article> {
         try {
             console.log('Fetching article from:', `${this.API_BASE_URL}/articles/${id}`);

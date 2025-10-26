@@ -7,7 +7,6 @@ import tempfile
 import os
 import logging
 
-# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,6 @@ def audio_to_text(audio_file: UploadFile) -> str:
     try:
         logger.info(f"Начало обработки аудиофайла: {audio_file.filename}")
         
-        # Создаем временный файл
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
             content = audio_file.file.read()
             temp_audio.write(content)
@@ -37,7 +35,6 @@ def audio_to_text(audio_file: UploadFile) -> str:
         
         logger.info(f"Временный файл создан: {temp_audio_path}")
         
-        # Конвертируем в WAV если нужно
         try:
             audio = AudioSegment.from_file(temp_audio_path)
             wav_path = temp_audio_path.replace('.wav', '_converted.wav')
@@ -46,11 +43,9 @@ def audio_to_text(audio_file: UploadFile) -> str:
         except Exception as e:
             raise Exception(f"Ошибка конвертации аудио в WAV: {str(e)}")
         
-        # Распознаем речь
         recognizer = sr.Recognizer()
         try:
             with sr.AudioFile(wav_path) as source:
-                # Adjust for ambient noise
                 recognizer.adjust_for_ambient_noise(source, duration=0.5)
                 audio_data = recognizer.record(source)
                 logger.info("Аудио записано, начинаем распознавание...")
@@ -70,7 +65,6 @@ def audio_to_text(audio_file: UploadFile) -> str:
         raise e
         
     finally:
-        # Удаляем временные файлы
         try:
             if temp_audio_path and os.path.exists(temp_audio_path):
                 os.unlink(temp_audio_path)

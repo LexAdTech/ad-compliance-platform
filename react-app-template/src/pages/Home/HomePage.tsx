@@ -5,6 +5,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { adAnalysisService } from '../../services/adAnalysisService';
 import { usePdfExport } from '../../hooks/usePdfExport';
 import styles from './HomePage.module.css';
+import audioIcon from '../../images/audio_icon.png';
 
 interface HomePageProps {
   onNavigateArticles: () => void;
@@ -16,8 +17,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   onLoginClick,
 }) => {
   const [adText, setAdText] = useState('');
-  const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
-  const [convertedText, setConvertedText] = useState<string>('');
   const [checkResultVisible, setCheckResultVisible] = useState(false);
   const [detailedTextHidden, setDetailedTextHidden] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -29,21 +28,15 @@ export const HomePage: React.FC<HomePageProps> = ({
   const { isLoggedIn } = useAuthContext();
   const { exportAnalysisToPdf, isGenerating } = usePdfExport();
 
-  // Обработчик загрузки аудио
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('audio/')) {
-      setSelectedAudio(file);
-      setError(null);
-      
-      // Автоматически запускаем анализ после выбора файла
       handleAudioAnalysis(file);
     } else if (file) {
       setError('Пожалуйста, выберите аудиофайл');
     }
   };
 
-  // Анализ аудио
   const handleAudioAnalysis = async (audioFile: File) => {
     setLoading(true);
     setError(null);
@@ -68,9 +61,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       if (result.error) {
         setError(result.error);
       } else {
-        // Вставляем распознанный текст в поле ввода
         setAdText(result.converted_text || '');
-        setConvertedText(result.converted_text || '');
         setAnalysisResult(result.analysis);
         setCheckResultVisible(true);
         setDetailedTextHidden(false);
@@ -81,6 +72,10 @@ export const HomePage: React.FC<HomePageProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAudioIconClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleExportPdf = async () => {
@@ -140,11 +135,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     onLoginClick();
   };
 
-  // Клик по иконке аудио
-  const handleAudioIconClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
     <div className={styles.container}>
       <Header
@@ -173,25 +163,16 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <section className={styles.checkSection}>
-          <div className={styles.checkTitle}>Введите текст вашей рекламы...</div>
-          
-          <div className={styles.textareaContainer}>
-            <textarea
-              value={adText}
-              onChange={(e) => setAdText(e.target.value)}
-              rows={4}
-              className={styles.textarea}
-              placeholder="Введите текст рекламы для проверки или загрузите аудио..."
-              disabled={loading}
-            />
+          <div className={styles.titleRow}>
+            <div className={styles.checkTitle}>Введите текст Вашей рекламы или загрузите аудиофайл</div>
             <button
               type="button"
-              className={styles.audioUploadButton}
+              className={styles.audioIcon}
               onClick={handleAudioIconClick}
               disabled={loading}
               title="Загрузить аудио"
             >
-              🎤
+              <img src={audioIcon} alt="Загрузить аудио" className={styles.audioIconImage} />
             </button>
             <input
               type="file"
@@ -201,26 +182,27 @@ export const HomePage: React.FC<HomePageProps> = ({
               style={{ display: 'none' }}
             />
           </div>
-
-          {selectedAudio && (
-            <div className={styles.audioInfo}>
-              Загружено аудио: {selectedAudio.name}
-            </div>
-          )}
+          
+          <textarea
+            value={adText}
+            onChange={(e) => setAdText(e.target.value)}
+            rows={4}
+            className={styles.textarea}
+            placeholder="Введите текст рекламы для проверки..."
+            disabled={loading}
+          />
 
           <button
             onClick={handleCheck}
             className={styles.checkButton}
-            disabled={loading || !adText.trim()}
+            disabled={loading}
           >
             {loading ? 'Анализ...' : 'Проверить'}
           </button>
 
           {loading && (
             <div className={styles.result}>
-              <div className={styles.loading}>
-                {selectedAudio ? 'Анализируем аудио...' : 'Анализируем текст...'}
-              </div>
+              <div className={styles.loading}>Идет анализ рекламы...</div>
             </div>
           )}
 
