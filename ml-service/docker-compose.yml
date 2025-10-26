@@ -18,6 +18,8 @@ services:
               count: 1
               capabilities: [gpu]
     restart: unless-stopped
+    networks:
+      - app-network
 
   image-analyzer:
     build:
@@ -31,3 +33,24 @@ services:
       - TRANSFORMERS_CACHE=/app/models
       - HF_HOME=/app/models
     restart: unless-stopped
+    networks:
+      - app-network
+
+  speech-to-text:
+    build:
+      context: ./speech-to-text
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+    networks:
+      - app-network
+    # Добавляем зависимости для ffmpeg (нужен для pydub)
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Убедитесь, что в Dockerfile установлены необходимые пакеты
+
+# Добавляем сеть для связи между сервисами
+networks:
+  app-network:
+    driver: bridge
