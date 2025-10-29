@@ -9,6 +9,7 @@ import audioIcon from '../../images/audio_icon.png';
 
 interface HomePageProps {
   onNavigateArticles: () => void;
+  onNavigateContact: () => void;
   onLoginClick: () => void;
 }
 

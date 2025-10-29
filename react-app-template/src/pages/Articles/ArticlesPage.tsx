@@ -8,6 +8,8 @@ import styles from './ArticlesPage.module.css';
 
 interface ArticlesPageProps {
     onNavigateHome: () => void;
+    onNavigateArticles: () => void;
+    onNavigateContact: () => void;
     onLoginClick: () => void;
 }
 
@@ -15,6 +17,8 @@ type ViewMode = 'list' | 'detail';
 
 export const ArticlesPage: React.FC<ArticlesPageProps> = ({
                                                               onNavigateHome,
+                                                              onNavigateArticles,
+                                                              onNavigateContact,
                                                               onLoginClick,
                                                           }) => {
     const [articles, setArticles] = useState<Article[]>([]);
@@ -66,7 +70,8 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
             <Header
                 currentPage="articles"
                 onNavigateHome={onNavigateHome}
-                onNavigateArticles={() => {}} // Пустая функция, так как уже на статьях
+                onNavigateArticles={onNavigateArticles}
+                onNavigateContact={onNavigateContact}
                 onLoginClick={onLoginClick}
             />
 
