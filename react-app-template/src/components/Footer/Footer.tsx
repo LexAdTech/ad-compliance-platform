@@ -54,7 +54,7 @@ export const Footer: React.FC = () => {
 
                 <div className={styles.bottomSection}>
                     <div className={styles.copyright}>
-                        © 2024 ФоксПлюс. Все права защищены.
+                        © 2025 ФоксПлюс. Все права защищены.
                     </div>
                     <div className={styles.contacts}>
                         <span className={styles.contact}>contact@foxplus.ru</span>
