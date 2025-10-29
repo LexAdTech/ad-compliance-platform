@@ -16,54 +16,50 @@ interface MarkdownLinkProps {
     children?: React.ReactNode;
 }
 
-interface MarkdownCodeProps {
-    node?: any;
-    inline?: boolean;
-    className?: string;
-    children?: React.ReactNode;
-}
-
-interface MarkdownBlockquoteProps {
-    node?: any;
-    children?: React.ReactNode;
-}
-
-interface MarkdownListProps {
-    node?: any;
-    ordered?: boolean;
-    children?: React.ReactNode;
-}
-
-interface MarkdownListItemProps {
-    node?: any;
-    children?: React.ReactNode;
-}
-
-// Функция для преобразования текста в правильный Markdown
+// Упрощенная функция предобработки - фокусируемся только на основных проблемах
 const preprocessMarkdown = (text: string): string => {
     if (!text) return '';
 
-    return text
-        // Заменяем • на стандартные маркеры списка Markdown
-        .replace(/•\s+/g, '- ')
-        // Заменяем переносы строк с • на элементы списка
-        .replace(/\n\s*•/g, '\n-')
-        // Обрабатываем нумерованные списки с точками
-        .replace(/(\d+)\.\s+/g, '$1. ')
-        // Добавляем пробелы после заголовков для лучшего отображения
-        .replace(/(#+)([^#\n])/g, '$1 $2')
-        // Обрабатываем двойные переносы как новые параграфы
+    console.log('Original text:', text); // Для отладки
+
+    let processed = text
+        // Сначала обрабатываем основные маркеры списков
+        .replace(/^•\s+/gm, '- ')
+        .replace(/\n\s*•\s*/g, '\n- ')
+        .replace(/^(\d+)\.\s+/gm, '$1. ')
+        // Обрабатываем переносы строк
         .replace(/\n\n/g, '\n\n')
-        // Обрабатываем одиночные переносы как <br>
         .replace(/\n(?!\n)/g, '  \n');
+
+    // Специальная обработка для проблемных ссылок
+    // Ищем паттерны типа ([текст](url)) и исправляем их
+    processed = processed.replace(
+        /\(\[([^\]]+)\]\(\s*([^)]+)\s*\)\)/g,
+        (match, linkText, url) => {
+            console.log('Found link:', { match, linkText, url }); // Для отладки
+            // Очищаем URL от пробелов и лишних символов
+            const cleanedUrl = url
+                .replace(/\s+/g, '')
+                .replace(/\n/g, '')
+                .trim();
+            return `([${linkText}](${cleanedUrl}))`;
+        }
+    );
+
+    console.log('Processed text:', processed); // Для отладки
+    return processed;
 };
 
-// Компоненты для кастомизации рендеринга Markdown
-const MarkdownComponents = {
-    // Кастомизация ссылок
-    a: ({ node, href, children, ...props }: MarkdownLinkProps) => (
+// Компонент для кастомного рендеринга ссылок
+const CustomLink = ({ node, href, children, ...props }: MarkdownLinkProps) => {
+    // Очищаем URL от возможных пробелов и лишних символов
+    const cleanHref = href
+        ? href.replace(/\s+/g, '').replace(/\n/g, '').trim()
+        : '';
+
+    return (
         <a
-            href={href}
+            href={cleanHref}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.link}
@@ -71,9 +67,33 @@ const MarkdownComponents = {
         >
             {children}
         </a>
+    );
+};
+
+// Базовые компоненты для Markdown
+const MarkdownComponents = {
+    a: CustomLink,
+    p: ({ node, children, ...props }: any) => (
+        <p className={styles.paragraph} {...props}>
+            {children}
+        </p>
     ),
-    // Кастомизация блоков кода
-    code: ({ node, inline, className, children, ...props }: MarkdownCodeProps) => {
+    ul: ({ node, children, ...props }: any) => (
+        <ul className={styles.list} {...props}>
+            {children}
+        </ul>
+    ),
+    ol: ({ node, children, ...props }: any) => (
+        <ol className={styles.list} {...props}>
+            {children}
+        </ol>
+    ),
+    li: ({ node, children, ...props }: any) => (
+        <li className={styles.listItem} {...props}>
+            {children}
+        </li>
+    ),
+    code: ({ node, inline, className, children, ...props }: any) => {
         if (inline) {
             return <code className={styles.inlineCode} {...props}>{children}</code>;
         }
@@ -85,34 +105,6 @@ const MarkdownComponents = {
             </pre>
         );
     },
-    // Кастомизация блоков цитат
-    blockquote: ({ node, children, ...props }: MarkdownBlockquoteProps) => (
-        <blockquote className={styles.blockquote} {...props}>
-            {children}
-        </blockquote>
-    ),
-    // Кастомизация списков
-    ul: ({ node, children, ...props }: MarkdownListProps) => (
-        <ul className={styles.list} {...props}>
-            {children}
-        </ul>
-    ),
-    ol: ({ node, children, ...props }: MarkdownListProps) => (
-        <ol className={styles.list} {...props}>
-            {children}
-        </ol>
-    ),
-    li: ({ node, children, ...props }: MarkdownListItemProps) => (
-        <li className={styles.listItem} {...props}>
-            {children}
-        </li>
-    ),
-    // Кастомизация параграфов для лучшего отображения
-    p: ({ node, children, ...props }: any) => (
-        <p className={styles.paragraph} {...props}>
-            {children}
-        </p>
-    ),
 };
 
 export const ArticleDetail: React.FC<ArticleDetailProps> = ({
@@ -144,7 +136,6 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                 <div className={styles.content}>
                     <ReactMarkdown
                         components={MarkdownComponents}
-                        skipHtml={false}
                     >
                         {processedContent}
                     </ReactMarkdown>
