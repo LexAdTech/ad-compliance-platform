@@ -181,3 +181,39 @@
     color: #7f8c8d;
     font-style: italic;
 }
+
+
+/* ArticleDetail.module.css */
+.list {
+    margin: 1em 0;
+    padding-left: 2em;
+    line-height: 1.6;
+}
+
+.listItem {
+    margin: 0.5em 0;
+}
+
+.paragraph {
+    margin: 1em 0;
+    line-height: 1.6;
+}
+
+
+/* ArticleDetail.module.css */
+.link {
+    color: #0066cc;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.link:hover {
+    border-bottom-color: #0066cc;
+}
+
+.paragraph {
+    margin: 1em 0;
+    line-height: 1.6;
+    word-wrap: break-word;
+}

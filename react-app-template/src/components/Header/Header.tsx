@@ -71,8 +71,6 @@ export const Header: React.FC<HeaderProps> = ({
                     Связаться с нами
                 </button>
 
-                <button className={styles.navButton}>Ссылки</button>
-
                 {isLoggedIn ? (
                     <button
                         className={styles.authButton}
