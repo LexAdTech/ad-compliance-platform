@@ -1,17 +1,30 @@
+// Файл: ./pages/Articles/ArticlesPage.tsx
 import React, { useState, useEffect } from 'react';
-import { Article } from '../../types/Article';
-import { ArticleService } from '../../services/ArticleService';
-import { ArticleCard } from '../../components/ArticleCard/ArticleCard';
-import { ArticleTable } from '../../components/ArticleTable/ArticleTable';
-import { ViewModeToggle } from '../../components/ViewModeToggle/ViewModeToggle';
-import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage';
-import './ArticlesPage.scss';
+import { Header } from '../../components/Header/Header';
+import { ArticleList } from '../../components/Articles/ArticleList';
+import { ArticleDetail } from '../../components/Articles/ArticleDetail';
+import { ArticleService, Article } from '../../services/ArticleService';
+import styles from './ArticlesPage.module.css';
 
-type ViewMode = 'list' | 'table';
+interface ArticlesPageProps {
+    onNavigateHome: () => void;
+    onNavigateArticles: () => void;
+    onNavigateContact: () => void;
+    onLoginClick: () => void;
+    initialArticleId?: number | null;
+}
 
-export const ArticlesPage: React.FC = () => {
+type ViewMode = 'list' | 'detail';
+
+export const ArticlesPage: React.FC<ArticlesPageProps> = ({
+                                                              onNavigateHome,
+                                                              onNavigateArticles,
+                                                              onNavigateContact,
+                                                              onLoginClick,
+                                                              initialArticleId = null,
+                                                          }) => {
     const [articles, setArticles] = useState<Article[]>([]);
+    const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -23,60 +36,77 @@ export const ArticlesPage: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const articlesData = await ArticleService.getArticles();
-
-                // Сортировка статей по дате создания (сначала новые)
-                const sortedArticles = articlesData.sort((a, b) =>
-                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                );
-
-                setArticles(sortedArticles);
+                setArticles(articlesData);
+                
+                // Если есть initialArticleId, загружаем эту статью
+                if (initialArticleId) {
+                    const article = await ArticleService.getArticleById(initialArticleId);
+                    setCurrentArticle(article);
+                    setViewMode('detail');
+                }
             } catch (err) {
-                setError('Ошибка при загрузке статей');
-                console.error('Error fetching articles:', err);
+                setError(err instanceof Error ? err.message : 'Failed to load articles');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchArticles();
-    }, []);
+    }, [initialArticleId]);
 
-    const handleViewModeChange = (mode: ViewMode) => {
-        setViewMode(mode);
+    // Обработчик клика по статье
+    const handleArticleClick = async (articleId: number) => { // Меняем string на number
+        try {
+            setLoading(true);
+            const article = await ArticleService.getArticleById(articleId);
+            setCurrentArticle(article);
+            setViewMode('detail');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load article');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (loading) {
-        return <LoadingSpinner />;
-    }
-
-    if (error) {
-        return <ErrorMessage message={error} />;
-    }
+    // Обработчик возврата к списку
+    const handleBackToList = () => {
+        setViewMode('list');
+        setCurrentArticle(null);
+    };
 
     return (
-        <div className="articles-page">
-            <div className="articles-page__header">
-                <h1 className="articles-page__title">Статьи</h1>
-                <ViewModeToggle
-                    currentMode={viewMode}
-                    onModeChange={handleViewModeChange}
-                />
-            </div>
+        <div className={styles.container}>
+            <Header
+                currentPage="articles"
+                onNavigateHome={onNavigateHome}
+                onNavigateArticles={onNavigateArticles}
+                onNavigateContact={onNavigateContact}
+                onLoginClick={onLoginClick}
+            />
 
-            <div className="articles-page__content">
-                {viewMode === 'list' ? (
-                    <div className="articles-list">
-                        {articles.map((article) => (
-                            <ArticleCard
-                                key={article.id}
-                                article={article}
-                            />
-                        ))}
+            <main className={styles.main}>
+                {loading && <div className={styles.loading}>Загрузка...</div>}
+                {error && (
+                    <div className={styles.error}>
+                        <p>{error}</p>
+                        <button onClick={() => window.location.reload()}>Попробовать снова</button>
                     </div>
-                ) : (
-                    <ArticleTable articles={articles} />
                 )}
-            </div>
+
+                {!loading && !error && viewMode === 'list' && (
+                    <ArticleList
+                        articles={articles}
+                        onArticleClick={handleArticleClick}
+                    />
+                )}
+
+                {!loading && !error && viewMode === 'detail' && currentArticle && (
+                    <ArticleDetail
+                        article={currentArticle}
+                        onBackClick={handleBackToList}
+                    />
+                )}
+            </main>
         </div>
     );
 };
