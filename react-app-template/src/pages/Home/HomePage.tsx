@@ -283,7 +283,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           {(loading || isAnalyzingImage) && (
             <div className={styles.result}>
               <div className={styles.loading}>
-                {loading ? 'Идёт анализ текста. Это может занять несколько минут...' : 'Идёт анализ изображения. Это может занять несколько минуты...'}
+                {loading ? 'Идёт анализ текста. Это может занять несколько минут...' : 'Идёт анализ изображения. Это может занять несколько минут...'}
               </div>
             </div>
           )}
