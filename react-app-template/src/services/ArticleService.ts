@@ -1,4 +1,11 @@
-import { Article } from '../types';
+// Файл: ./services/ArticleService.ts
+export interface Article {
+    id: number;
+    title: string;
+    text: string;
+    excerpt?: string;
+    created_at: string;
+}
 
 export class ArticleService {
     private static readonly API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
@@ -42,7 +49,7 @@ export class ArticleService {
         }
     }
 
-    static async getArticleById(id: string): Promise<Article> {
+    static async getArticleById(id: number): Promise<Article> { // Меняем string на number
         try {
             console.log('Fetching article from:', `${this.API_BASE_URL}/articles/${id}`);
 
@@ -66,5 +73,3 @@ export class ArticleService {
         }
     }
 }
-
-export type { Article };

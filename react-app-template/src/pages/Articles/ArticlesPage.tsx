@@ -1,28 +1,17 @@
-// pages/Articles/ArticlesPage.tsx
 import React, { useState, useEffect } from 'react';
-import { Header } from '../../components/Header/Header';
-import { ArticleList } from '../../components/Articles/ArticleList';
-import { ArticleDetail } from '../../components/Articles/ArticleDetail';
-import { ArticleService, Article } from '../../services/ArticleService';
-import styles from './ArticlesPage.module.css';
+import { Article } from '../../types/Article';
+import { ArticleService } from '../../services/ArticleService';
+import { ArticleCard } from '../../components/ArticleCard/ArticleCard';
+import { ArticleTable } from '../../components/ArticleTable/ArticleTable';
+import { ViewModeToggle } from '../../components/ViewModeToggle/ViewModeToggle';
+import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
+import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage';
+import './ArticlesPage.scss';
 
-interface ArticlesPageProps {
-    onNavigateHome: () => void;
-    onNavigateArticles: () => void;
-    onNavigateContact: () => void;
-    onLoginClick: () => void;
-}
+type ViewMode = 'list' | 'table';
 
-type ViewMode = 'list' | 'detail';
-
-export const ArticlesPage: React.FC<ArticlesPageProps> = ({
-                                                              onNavigateHome,
-                                                              onNavigateArticles,
-                                                              onNavigateContact,
-                                                              onLoginClick,
-                                                          }) => {
+export const ArticlesPage: React.FC = () => {
     const [articles, setArticles] = useState<Article[]>([]);
-    const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,7 +31,8 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
 
                 setArticles(sortedArticles);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load articles');
+                setError('Ошибка при загрузке статей');
+                console.error('Error fetching articles:', err);
             } finally {
                 setLoading(false);
             }
@@ -51,59 +41,42 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
         fetchArticles();
     }, []);
 
-    // Обработчик клика по статье
-    const handleArticleClick = async (articleId: string) => {
-        try {
-            setLoading(true);
-            const article = await ArticleService.getArticleById(articleId);
-            setCurrentArticle(article);
-            setViewMode('detail');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load article');
-        } finally {
-            setLoading(false);
-        }
+    const handleViewModeChange = (mode: ViewMode) => {
+        setViewMode(mode);
     };
 
-    // Обработчик возврата к списку
-    const handleBackToList = () => {
-        setViewMode('list');
-        setCurrentArticle(null);
-    };
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    if (error) {
+        return <ErrorMessage message={error} />;
+    }
 
     return (
-        <div className={styles.container}>
-            <Header
-                currentPage="articles"
-                onNavigateHome={onNavigateHome}
-                onNavigateArticles={onNavigateArticles}
-                onNavigateContact={onNavigateContact}
-                onLoginClick={onLoginClick}
-            />
+        <div className="articles-page">
+            <div className="articles-page__header">
+                <h1 className="articles-page__title">Статьи</h1>
+                <ViewModeToggle
+                    currentMode={viewMode}
+                    onModeChange={handleViewModeChange}
+                />
+            </div>
 
-            <main className={styles.main}>
-                {loading && <div className={styles.loading}>Загрузка...</div>}
-                {error && (
-                    <div className={styles.error}>
-                        <p>{error}</p>
-                        <button onClick={() => window.location.reload()}>Попробовать снова</button>
+            <div className="articles-page__content">
+                {viewMode === 'list' ? (
+                    <div className="articles-list">
+                        {articles.map((article) => (
+                            <ArticleCard
+                                key={article.id}
+                                article={article}
+                            />
+                        ))}
                     </div>
+                ) : (
+                    <ArticleTable articles={articles} />
                 )}
-
-                {!loading && !error && viewMode === 'list' && (
-                    <ArticleList
-                        articles={articles}
-                        onArticleClick={handleArticleClick}
-                    />
-                )}
-
-                {!loading && !error && viewMode === 'detail' && currentArticle && (
-                    <ArticleDetail
-                        article={currentArticle}
-                        onBackClick={handleBackToList}
-                    />
-                )}
-            </main>
+            </div>
         </div>
     );
 };

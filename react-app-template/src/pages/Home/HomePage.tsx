@@ -1,29 +1,37 @@
+// Файл: ./pages/Home/HomePage.tsx
 import React, { useState, useRef } from 'react';
 import { Header } from '../../components/Header/Header';
 import SvgIcon from '../../components/Common/SvgIcon';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { adAnalysisService } from '../../services/adAnalysisService';
 import { imageAnalysisService } from '../../services/imageAnalysisService';
+import { recommendationService } from '../../services/recommendationService';
+import { ArticleRecommendations } from '../../components/ArticleRecommendations/ArticleRecommendations';
 import { usePdfExport } from '../../hooks/usePdfExport';
 import styles from './HomePage.module.css';
 import audioIcon from '../../images/audio_icon.png';
 import imageIcon from '../../images/image_icon.png';
+import { Article } from '../../services/ArticleService';
 
 interface HomePageProps {
   onNavigateArticles: () => void;
   onNavigateContact: () => void;
   onLoginClick: () => void;
+  onArticleClick: (articleId: number) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   onNavigateArticles,
   onNavigateContact,
   onLoginClick,
+  onArticleClick,
 }) => {
   const [adText, setAdText] = useState('');
   const [analysisResult, setAnalysisResult] = useState<string>('');
+  const [recommendedArticles, setRecommendedArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +39,22 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   const { isLoggedIn } = useAuthContext();
   const { exportAnalysisToPdf, isGenerating } = usePdfExport();
+
+  // Функция для загрузки рекомендаций
+  const loadRecommendations = async (text: string) => {
+    if (!text.trim()) return;
+    
+    setIsLoadingRecommendations(true);
+    try {
+      const recommendations = await recommendationService.getArticleRecommendations(text);
+      setRecommendedArticles(recommendations);
+    } catch (err) {
+      console.error('Error loading recommendations:', err);
+      // Не показываем ошибку пользователю, если рекомендации не загрузились
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
+  };
 
   // Обработчик загрузки аудио
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +81,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     setLoading(true);
     setError(null);
     setAnalysisResult('');
+    setRecommendedArticles([]);
 
     try {
       const formData = new FormData();
@@ -79,6 +104,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       } else {
         setAdText(result.converted_text || '');
         setAnalysisResult(result.analysis);
+        // Загружаем рекомендации после успешного анализа
+        if (result.converted_text) {
+          await loadRecommendations(result.converted_text);
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Ошибка при анализе аудио');
@@ -92,10 +121,12 @@ export const HomePage: React.FC<HomePageProps> = ({
     setIsAnalyzingImage(true);
     setError(null);
     setAnalysisResult('');
+    setRecommendedArticles([]);
 
     try {
       const result = await imageAnalysisService.analyzeAdImage(imageFile);
       setAnalysisResult(result.analysis);
+      // Для изображений рекомендации не загружаем, так как нет текста
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Ошибка при анализе изображения');
     } finally {
@@ -137,6 +168,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     setLoading(true);
     setError(null);
     setAnalysisResult('');
+    setRecommendedArticles([]);
 
     try {
       const result = await adAnalysisService.analyzeAdText(
@@ -145,6 +177,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       );
 
       setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
+      
+      // Загружаем рекомендации после успешного анализа
+      await loadRecommendations(adText);
+      
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(`Ошибка: ${err.message}`);
@@ -259,41 +295,50 @@ export const HomePage: React.FC<HomePageProps> = ({
           )}
 
           {analysisResult && (
-            <div className={styles.result}>
-              <div className={styles.resultHeader}>
-                <h3>Результат анализа:</h3>
-                <button
-                  onClick={handleExportPdf}
-                  disabled={isGenerating}
-                  className={styles.exportPdfButton}
-                >
-                  {isGenerating ? 'Создание...' : '📥 PDF'}
-                </button>
-              </div>
-              
-              {!isLoggedIn ? (
-                <>
-                  <div className={styles.errorMessage}>
-                    {analysisResult}
-                  </div>
-                  <div className={styles.prompt}>
-                    Хотите узнать подробнее?
-                  </div>
+            <>
+              <div className={styles.result}>
+                <div className={styles.resultHeader}>
+                  <h3>Результат анализа:</h3>
                   <button
-                    onClick={handleDetailedResultLogin}
-                    className={styles.loginPromptButton}
+                    onClick={handleExportPdf}
+                    disabled={isGenerating}
+                    className={styles.exportPdfButton}
                   >
-                    Войти
+                    {isGenerating ? 'Создание...' : '📥 PDF'}
                   </button>
-                </>
-              ) : (
-                <div className={styles.analysisText}>
-                  {analysisResult.split('\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
                 </div>
-              )}
-            </div>
+                
+                {!isLoggedIn ? (
+                  <>
+                    <div className={styles.errorMessage}>
+                      {analysisResult}
+                    </div>
+                    <div className={styles.prompt}>
+                      Хотите узнать подробнее?
+                    </div>
+                    <button
+                      onClick={handleDetailedResultLogin}
+                      className={styles.loginPromptButton}
+                    >
+                      Войти
+                    </button>
+                  </>
+                ) : (
+                  <div className={styles.analysisText}>
+                    {analysisResult.split('\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Блок рекомендаций */}
+              <ArticleRecommendations
+                articles={recommendedArticles}
+                loading={isLoadingRecommendations}
+                onArticleClick={onArticleClick}
+              />
+            </>
           )}
         </section>
       </main>

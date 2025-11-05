@@ -28,10 +28,16 @@ services:
     ports:
       - "8002:8000"
     volumes:
-      - ./models:/app/models
+      - ollama_data:/root/.ollama
     environment:
-      - TRANSFORMERS_CACHE=/app/models
-      - HF_HOME=/app/models
+      - OLLAMA_HOST=0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     restart: unless-stopped
     networks:
       - app-network
@@ -47,6 +53,9 @@ services:
       - app-network
     environment:
       - PYTHONUNBUFFERED=1
+
+volumes:
+  ollama_data:
 
 networks:
   app-network:
