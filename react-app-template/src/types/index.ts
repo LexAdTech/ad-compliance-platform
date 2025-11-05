@@ -18,12 +18,11 @@ export interface RegisterData {
 
 export type AuthMode = 'login' | 'register';
 
-// types/index.ts
 export interface Article {
-  id: string;
+  id: number;
   title: string;
-  text: string; // Markdown содержимое
-  excerpt?: string; // Краткое описание
+  text: string;
+  excerpt?: string;
   created_at: string;
 }
 

@@ -1,3 +1,4 @@
+// Файл: ./entity/Article.java
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity;
 
 import jakarta.persistence.*;
@@ -22,4 +23,21 @@ public class Article {
 
     @Column(name = "created_at")
     private LocalDateTime created_at;
+
+    // Геттеры (Lombok @Data уже создает их, но явно объявим если нужно)
+    public String getTitle() {
+        return title;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return created_at;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

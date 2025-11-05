@@ -1,4 +1,4 @@
-// pages/Articles/ArticlesPage.tsx
+// Файл: ./pages/Articles/ArticlesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Header } from '../../components/Header/Header';
 import { ArticleList } from '../../components/Articles/ArticleList';
@@ -11,6 +11,7 @@ interface ArticlesPageProps {
     onNavigateArticles: () => void;
     onNavigateContact: () => void;
     onLoginClick: () => void;
+    initialArticleId?: number | null; // Меняем string на number
 }
 
 type ViewMode = 'list' | 'detail';
@@ -20,6 +21,7 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
                                                               onNavigateArticles,
                                                               onNavigateContact,
                                                               onLoginClick,
+                                                              initialArticleId = null,
                                                           }) => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
@@ -35,6 +37,13 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
                 setError(null);
                 const articlesData = await ArticleService.getArticles();
                 setArticles(articlesData);
+                
+                // Если есть initialArticleId, загружаем эту статью
+                if (initialArticleId) {
+                    const article = await ArticleService.getArticleById(initialArticleId);
+                    setCurrentArticle(article);
+                    setViewMode('detail');
+                }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load articles');
             } finally {
@@ -43,10 +52,10 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
         };
 
         fetchArticles();
-    }, []);
+    }, [initialArticleId]);
 
     // Обработчик клика по статье
-    const handleArticleClick = async (articleId: string) => {
+    const handleArticleClick = async (articleId: number) => { // Меняем string на number
         try {
             setLoading(true);
             const article = await ArticleService.getArticleById(articleId);

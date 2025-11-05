@@ -1,16 +1,16 @@
-// components/Articles/ArticleList.tsx
+// Файл: ./components/Articles/ArticleList.tsx
 import React from 'react';
-import { Article } from '../../types';
+import { Article } from '../../services/ArticleService';
 import styles from './ArticleList.module.css';
 
 interface ArticleListProps {
     articles: Article[];
-    onArticleClick: (articleId: string) => void;
+    onArticleClick: (articleId: number) => void; // Меняем string на number
 }
 
 export const ArticleList: React.FC<ArticleListProps> = ({
                                                             articles,
-                                                            onArticleClick
+                                                            onArticleClick,
                                                         }) => {
     return (
         <div className={styles.articleList}>

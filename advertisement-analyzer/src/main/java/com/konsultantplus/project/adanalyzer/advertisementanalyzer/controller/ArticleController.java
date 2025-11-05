@@ -1,3 +1,4 @@
+// Файл: ./controller/ArticleController.java
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.controller;
 
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.Article;
@@ -25,4 +26,8 @@ public class ArticleController {
         return articleService.getArticleById(id);
     }
 
+    @GetMapping("/search")
+    public List<Article> searchArticles(@RequestParam String keyword) {
+        return articleService.getArticlesByTitleContaining(keyword);
+    }
 }

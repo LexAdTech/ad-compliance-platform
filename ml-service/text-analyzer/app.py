@@ -117,6 +117,8 @@ async def analyze_text(request: TextRequest):
                 temperature=1.2,
                 top_p=0.9,
                 streamer=streamer,
+                pad_token_id=tokenizer.eos_token_id,  # Важно!
+                eos_token_id=tokenizer.eos_token_id,  # Остановка по концу текста
             )
         
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)

@@ -17,8 +17,21 @@ function AppContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [accessDeniedModalOpen, setAccessDeniedModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<AuthMode>('login');
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
 
   const { isLoggedIn } = useAuthContext();
+
+  // Добавляем недостающую функцию handleArticleClick
+  const handleArticleClick = (articleId: number) => {
+    if (isLoggedIn) {
+      // Если пользователь авторизован, переходим на страницу статей и открываем конкретную статью
+      setSelectedArticleId(articleId);
+      setCurrentPage('articles');
+    } else {
+      // Если не авторизован, показываем модальное окно доступа
+      setAccessDeniedModalOpen(true);
+    }
+  };
 
   const handleLoginSuccess = () => {
     setAuthModalOpen(false);
@@ -32,6 +45,7 @@ function AppContent() {
   const handleNavigateToArticles = () => {
     if (isLoggedIn) {
       setCurrentPage('articles');
+      setSelectedArticleId(null); // Сбрасываем выбранную статью при переходе к списку
     } else {
       setAccessDeniedModalOpen(true);
     }
@@ -39,10 +53,12 @@ function AppContent() {
 
   const handleNavigateToHome = () => {
     setCurrentPage('home');
+    setSelectedArticleId(null); // Сбрасываем выбранную статью при переходе на главную
   };
 
   const handleNavigateToContact = () => {
     setCurrentPage('contact');
+    setSelectedArticleId(null); // Сбрасываем выбранную статью при переходе в контакты
   };
 
   const handleAccessDeniedRegister = () => {
@@ -71,6 +87,7 @@ function AppContent() {
                 onNavigateArticles={handleNavigateToArticles}
                 onNavigateContact={handleNavigateToContact}
                 onLoginClick={handleLoginClick}
+                initialArticleId={selectedArticleId} // Передаем выбранную статью
             />
         );
       case 'contact':
@@ -89,6 +106,7 @@ function AppContent() {
                 onNavigateArticles={handleNavigateToArticles}
                 onNavigateContact={handleNavigateToContact}
                 onLoginClick={handleLoginClick}
+                onArticleClick={handleArticleClick}
             />
         );
     }

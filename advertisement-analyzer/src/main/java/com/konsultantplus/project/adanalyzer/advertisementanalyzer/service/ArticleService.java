@@ -1,3 +1,4 @@
+// Файл: ./service/ArticleService.java
 package com.konsultantplus.project.adanalyzer.advertisementanalyzer.service;
 
 import com.konsultantplus.project.adanalyzer.advertisementanalyzer.entity.Article;
@@ -18,7 +19,20 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
-    public Article getArticleById(long id) {
-        return articleRepository.findById(id);
+    public Article getArticleById(Long id) {
+        Optional<Article> article = articleRepository.findById(id);
+        return article.orElse(null);
+    }
+
+    public Article saveArticle(Article article) {
+        return articleRepository.save(article);
+    }
+
+    public void deleteArticle(Long id) {
+        articleRepository.deleteById(id);
+    }
+
+    public List<Article> getArticlesByTitleContaining(String keyword) {
+        return articleRepository.findByTitleContainingIgnoreCase(keyword);
     }
 }
