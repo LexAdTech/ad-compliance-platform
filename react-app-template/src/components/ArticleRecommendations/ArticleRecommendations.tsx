@@ -22,11 +22,11 @@ export const ArticleRecommendations: React.FC<ArticleRecommendationsProps> = ({
         );
     }
 
-    if (!articles || articles.length === 0) {
+    if (!articles || articles.length === 0) { // Надпись на блоке рекомендаций
         return (
             <div className={styles.recommendations}>
                 <div className={styles.noRecommendations}>
-                    <p>Рекомендации появятся здесь после анализа рекламы</p>
+                    <p></p> 
                 </div>
             </div>
         );
@@ -35,7 +35,7 @@ export const ArticleRecommendations: React.FC<ArticleRecommendationsProps> = ({
     return (
         <div className={styles.recommendations}>
             <div className={styles.recommendationsHeader}>
-                <div className={styles.recommendationsIcon}>📚</div>
+                <div className={styles.recommendationsIcon}></div>
                 <h3 className={styles.recommendationsTitle}>Рекомендуемые статьи</h3>
             </div>
 

@@ -60,7 +60,7 @@ class TextRequest(BaseModel):
 async def analyze_text(request: TextRequest):
     try:
         if request.report_type == "full":
-            # Промпт для полного отчета (авторизованные пользователи)
+            # Промпт для полного отчета
             prompt = f'''Ты — юридический эксперт по рекламному законодательству Российской Федерации.  
 Твоя задача — проанализировать рекламный текст исключительно в рамках Федерального закона № 38-ФЗ «О рекламе» и практики ФАС России.  
 
@@ -87,7 +87,7 @@ async def analyze_text(request: TextRequest):
 
 3. Юридические риски  
 - Административная ответственность по ст. [номер] КоАП РФ: [размер штрафа для ИП/юрлица].  
-- Риски: [перечисление: предписание ФАС, иск потребителя, иное].  
+- Риски: [перечисление: предписание ФАС, иск потребителя, иное].
 (Если рисков нет — укажи: «Юридических рисков не выявлено».)
 
 4. Рекомендации  
@@ -98,7 +98,7 @@ async def analyze_text(request: TextRequest):
 Больше ничего не пиши.
 '''
         else:
-            # Промпт для краткого отчета (неавторизованные пользователи)
+            # Промпт для краткого отчета
             prompt = f'''Текст: "{request.text}"
             
 Формат ответа (Только один вариант, уложись в 100 токенов. Больше ничего не пиши.):
@@ -111,18 +111,65 @@ async def analyze_text(request: TextRequest):
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         
         outputs = model.generate(
-                **inputs,
-                max_new_tokens=600 if request.report_type == "full" else 100,
-                do_sample=True,
-                temperature=1.2,
-                top_p=0.9,
-                streamer=streamer,
-                pad_token_id=tokenizer.eos_token_id,  # Важно!
-                eos_token_id=tokenizer.eos_token_id,  # Остановка по концу текста
-            )
+            **inputs,
+            max_new_tokens=1000 if request.report_type == "full" else 100,
+            do_sample=True,
+            temperature=1.2,
+            top_p=0.9,
+            streamer=streamer,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        )
         
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         analysis_result = response.replace(prompt, "").strip()
+        
+        # УЛУЧШЕННАЯ ОБРЕЗКА РЕЗУЛЬТАТА
+        if request.report_type == "full":
+            # Находим первое вхождение структуры отчета
+            start_marker = "1. Выявленные нарушения"
+            start_index = analysis_result.find(start_marker)
+            
+            if start_index != -1:
+                # Обрезаем все, что до первого маркера
+                analysis_result = analysis_result[start_index:]
+                
+                # Ищем ВСЕ возможные точки обрезки
+                cut_points = []
+                
+                # 1. Второе вхождение начального маркера
+                second_occurrence = analysis_result.find(start_marker, len(start_marker))
+                if second_occurrence != -1:
+                    cut_points.append(second_occurrence)
+                
+                # 2. Тройные кавычки ```
+                triple_quotes_index = analysis_result.find('```')
+                if triple_quotes_index != -1:
+                    cut_points.append(triple_quotes_index)
+                
+                # 3. Начало нового блока кода (если есть)
+                code_block_start = analysis_result.find('\n```')
+                if code_block_start != -1:
+                    cut_points.append(code_block_start)
+                
+                # Если нашли точки обрезки, берем самую раннюю
+                if cut_points:
+                    earliest_cut = min(cut_points)
+                    analysis_result = analysis_result[:earliest_cut].strip()
+            
+            # Дополнительная очистка: удаляем кавычки в начале, если есть
+            analysis_result = analysis_result.lstrip('"').strip()
+            
+            # Удаляем тройные кавычки в начале и конце, если остались
+            analysis_result = analysis_result.strip('`').strip()
+            
+        else:
+            # Для краткого отчета - берем только первую фразу
+            lines = analysis_result.split('\n')
+            if lines:
+                analysis_result = lines[0].strip()
+                # Удаляем кавычки если есть, включая тройные
+                analysis_result = analysis_result.strip('"').strip('`')
         
         return {"analysis": analysis_result}
     
