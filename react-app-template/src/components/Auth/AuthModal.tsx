@@ -60,7 +60,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className={styles.form}>
           {mode === 'register' && (
             <>
-              <label htmlFor="username">Имя пользователя</label>
+              <label htmlFor="username">Логин</label>
               <input
                 id="username"
                 type="text"
@@ -85,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           
           {mode === 'login' && (
             <>
-              <label htmlFor="username">Имя пользователя</label>
+              <label htmlFor="username">Логин</label>
               <input
                 id="username"
                 type="text"
