@@ -34,7 +34,13 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({
                 setLoading(true);
                 setError(null);
                 const articlesData = await ArticleService.getArticles();
-                setArticles(articlesData);
+
+                // Сортировка статей по дате создания (сначала новые)
+                const sortedArticles = articlesData.sort((a, b) =>
+                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                );
+
+                setArticles(sortedArticles);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load articles');
             } finally {

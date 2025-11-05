@@ -24,7 +24,8 @@ export const Footer: React.FC = () => {
                             </span>
                         </div>
                         <p className={styles.description}>
-                            Профессиональная проверка рекламы на соответствие законодательству РФ
+                            Сервис предоставляет предварительную оценку и носит рекомендательный характер.
+                            Для получения официального юридического заключения обратитесь к специалисту.
                         </p>
                     </div>
 
@@ -58,7 +59,7 @@ export const Footer: React.FC = () => {
                     </div>
                     <div className={styles.contacts}>
                         <span className={styles.contact}>contact@foxplus.ru</span>
-                        <span className={styles.contact}>+7 (999) 999-99-99</span>
+                        <span className={styles.contact}>+7 (777) 777-77-77</span>
                     </div>
                 </div>
             </div>
