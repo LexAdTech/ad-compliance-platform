@@ -19,13 +19,21 @@ export const usePdfExport = () => {
                 })
             };
 
-            // Используем метод с canvas для лучшей поддержки кириллицы
-            await PdfService.generateAnalysisPdfWithCanvas(fullContent);
+            console.log('Starting PDF generation with content:', {
+                title: fullContent.title,
+                originalTextLength: fullContent.originalText?.length,
+                analysisLength: fullContent.analysis?.length,
+                reportType: fullContent.reportType
+            });
+
+            // Пробуем основной метод
+            await PdfService.generatePdf(fullContent);
+            console.log('PDF generated successfully');
             return true;
         } catch (error) {
-            console.error('Ошибка при генерации PDF:', error);
+            console.error('Main PDF generation failed:', error);
 
-            // Пробуем использовать простой метод как запасной вариант
+            // Пробуем запасные методы
             try {
                 const fullContent: PdfContent = {
                     ...data,
@@ -37,11 +45,30 @@ export const usePdfExport = () => {
                         minute: '2-digit'
                     })
                 };
+
+                console.log('Trying fallback PDF generation method...');
+
+                // Пробуем альтернативный метод
                 await PdfService.generateAnalysisPdf(fullContent);
+                console.log('Fallback PDF generation successful');
                 return true;
             } catch (fallbackError) {
-                console.error('Fallback PDF generation also failed:', fallbackError);
-                throw new Error('Не удалось создать PDF файл');
+                console.error('All PDF generation methods failed:', fallbackError);
+
+                // Последняя попытка - самый простой метод
+                try {
+                    const fullContent: PdfContent = {
+                        ...data,
+                        timestamp: new Date().toLocaleString('ru-RU')
+                    };
+
+                    await PdfService.generateSimplePdf(fullContent);
+                    console.log('Simple PDF generation successful');
+                    return true;
+                } catch (finalError) {
+                    console.error('Final PDF generation attempt failed:', finalError);
+                    throw new Error('Не удалось создать PDF файл. Пожалуйста, попробуйте еще раз.');
+                }
             }
         } finally {
             setIsGenerating(false);

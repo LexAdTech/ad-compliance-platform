@@ -1,7 +1,6 @@
 // services/PdfService.ts
 import jsPDF from 'jspdf';
 
-// Добавляем поддержку кириллицы
 declare module 'jspdf' {
     interface jsPDF {
         autoTable: (options: any) => jsPDF;
@@ -17,199 +16,272 @@ export interface PdfContent {
 }
 
 export class PdfService {
+    // ОСНОВНОЙ ИСПРАВЛЕННЫЙ МЕТОД - с правильным переносом страниц
     static async generateAnalysisPdf(content: PdfContent): Promise<void> {
-        // Создаем PDF с поддержкой кириллицы
-        const pdf = new jsPDF();
+        return new Promise((resolve, reject) => {
+            try {
+                const pdf = new jsPDF();
+                const margin = 20;
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
 
-        // Устанавливаем шрифт поддерживающий кириллицу
-        // Временно используем стандартный шрифт, но правильно обрабатываем текст
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const margin = 20;
-        let yPosition = margin;
+                let yPosition = margin;
+                const lineHeight = 6;
 
-        // Функция для правильного отображения русского текста
-        const addText = (text: string, x: number, y: number, maxWidth?: number) => {
-            if (maxWidth) {
-                const lines = pdf.splitTextToSize(this.fixTextEncoding(text), maxWidth);
-                pdf.text(lines, x, y);
-                return lines.length;
-            } else {
-                pdf.text(this.fixTextEncoding(text), x, y);
-                return 1;
+                // Функция для очистки текста
+                const cleanText = (text: string): string => {
+                    if (!text) return '';
+                    return text
+                        .replace(/[^\x20-\x7E\xA0-\xFF\u0400-\u04FF\n\r\t]/g, '')
+                        .replace(/null/gi, '')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .replace(/[ \t]{2,}/g, ' ')
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .join('\n')
+                        .trim();
+                };
+
+                // Функция для добавления текста с автоматическим переносом страниц
+                const addTextWithPagination = (
+                    text: string,
+                    fontSize: number = 10,
+                    isBold: boolean = false,
+                    color?: number[],
+                    extraSpacing: number = 0
+                ): void => {
+                    if (color) {
+                        pdf.setTextColor(color[0], color[1], color[2]);
+                    }
+
+                    pdf.setFontSize(fontSize);
+                    pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+
+                    const maxWidth = pageWidth - 2 * margin;
+                    const cleanedText = cleanText(text);
+                    const lines = pdf.splitTextToSize(cleanedText, maxWidth);
+
+                    for (const line of lines) {
+                        // Проверяем, не вышли ли за границы страницы
+                        if (yPosition + lineHeight > pageHeight - margin) {
+                            pdf.addPage();
+                            yPosition = margin;
+                        }
+
+                        pdf.text(line, margin, yPosition);
+                        yPosition += lineHeight;
+                    }
+
+                    yPosition += extraSpacing;
+                };
+
+                // Заголовок документа
+                addTextWithPagination('Анализ рекламного текста', 16, true, [21, 114, 255], 10);
+
+                // Мета-информация
+                addTextWithPagination(`Заголовок: ${content.title}`, 10, false, [44, 62, 80]);
+                addTextWithPagination(`Тип отчета: ${content.reportType === 'short' ? 'Краткий' : 'Полный'}`, 10, false, [44, 62, 80]);
+                addTextWithPagination(`Дата анализа: ${content.timestamp}`, 10, false, [44, 62, 80], 15);
+
+                // Оригинальный текст
+                addTextWithPagination('Исходный текст:', 11, true, [255, 127, 50], 8);
+                addTextWithPagination(content.originalText, 10, false, [44, 62, 80], 15);
+
+                // Результаты анализа
+                addTextWithPagination('Результаты анализа:', 11, true, [21, 114, 255], 8);
+                addTextWithPagination(content.analysis, 10, false, [44, 62, 80]);
+
+                // Сохраняем PDF
+                const fileName = `анализ_${this.fixFileName(content.title)}_${Date.now()}.pdf`;
+                pdf.save(fileName);
+                resolve();
+            } catch (error) {
+                reject(error);
             }
-        };
-
-        // Заголовок
-        pdf.setFontSize(20);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(21, 114, 255);
-        addText('Анализ рекламного текста', margin, yPosition);
-        yPosition += 25;
-
-        // Информация о анализе
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(44, 62, 80);
-
-        addText(`Заголовок: ${content.title}`, margin, yPosition);
-        yPosition += 10;
-
-        addText(`Тип отчета: ${content.reportType === 'short' ? 'Краткий' : 'Полный'}`, margin, yPosition);
-        yPosition += 10;
-
-        addText(`Дата анализа: ${content.timestamp}`, margin, yPosition);
-        yPosition += 20;
-
-        // Оригинальный текст
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(255, 127, 50);
-        addText('Исходный текст:', margin, yPosition);
-        yPosition += 10;
-
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(44, 62, 80);
-        const originalTextLines = pdf.splitTextToSize(this.fixTextEncoding(content.originalText), pageWidth - 2 * margin);
-        pdf.text(originalTextLines, margin, yPosition);
-        yPosition += originalTextLines.length * 7 + 15;
-
-        // Результаты анализа
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(21, 114, 255);
-        addText('Результаты анализа:', margin, yPosition);
-        yPosition += 10;
-
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(44, 62, 80);
-        const analysisText = this.fixTextEncoding(content.analysis);
-        const analysisLines = pdf.splitTextToSize(analysisText, pageWidth - 2 * margin);
-
-        // Проверяем, помещается ли текст на текущей странице
-        const lineHeight = 7;
-        const neededHeight = analysisLines.length * lineHeight;
-
-        if (yPosition + neededHeight > pdf.internal.pageSize.getHeight() - margin) {
-            pdf.addPage();
-            yPosition = margin;
-        }
-
-        pdf.text(analysisLines, margin, yPosition);
-
-        // Сохраняем PDF
-        const fileName = `анализ_${this.fixFileName(content.title)}_${Date.now()}.pdf`;
-        pdf.save(fileName);
+        });
     }
 
-    // Функция для исправления кодировки текста
-    private static fixTextEncoding(text: string): string {
-        if (!text) return '';
+    // АЛЬТЕРНАТИВНЫЙ МЕТОД с использованием autoTable для лучшего форматирования
+    static async generateAnalysisPdfWithCanvas(content: PdfContent): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                const pdf = new jsPDF();
+                const margin = 20;
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                let yPosition = 20;
 
-        // Заменяем проблемные символы
-        return text
-            .replace(/null/g, '') // Убираем null
-            .replace(/\u0000/g, '') // Убираем нулевые символы
-            .normalize('NFC'); // Нормализуем Unicode
+                // Функция для очистки текста
+                const cleanText = (text: string): string => {
+                    if (!text) return '';
+                    return text
+                        .replace(/[^\x20-\x7E\xA0-\xFF\u0400-\u04FF\n\r\t]/g, '')
+                        .replace(/null/gi, '')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .replace(/[ \t]{2,}/g, ' ')
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .join('\n')
+                        .trim();
+                };
+
+                // Добавление текста с переносом страниц
+                const addText = (text: string, x: number, y: number, maxWidth: number, fontSize: number = 10, isBold: boolean = false): number => {
+                    pdf.setFontSize(fontSize);
+                    pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+
+                    const lines = pdf.splitTextToSize(text, maxWidth);
+                    let currentY = y;
+
+                    for (let i = 0; i < lines.length; i++) {
+                        // Проверка на необходимость новой страницы
+                        if (currentY > pdf.internal.pageSize.getHeight() - 20) {
+                            pdf.addPage();
+                            currentY = 20;
+                        }
+                        pdf.text(lines[i], x, currentY);
+                        currentY += 7;
+                    }
+
+                    return currentY;
+                };
+
+                // Заголовок
+                pdf.setTextColor(21, 114, 255);
+                yPosition = addText('Анализ рекламного текста', margin, yPosition, pageWidth - 2 * margin, 16, true) + 10;
+
+                // Мета-информация
+                pdf.setTextColor(44, 62, 80);
+                yPosition = addText(`Заголовок: ${cleanText(content.title)}`, margin, yPosition, pageWidth - 2 * margin, 10, false) + 5;
+                yPosition = addText(`Тип отчета: ${content.reportType === 'short' ? 'Краткий' : 'Полный'}`, margin, yPosition, pageWidth - 2 * margin, 10, false) + 5;
+                yPosition = addText(`Дата анализа: ${cleanText(content.timestamp)}`, margin, yPosition, pageWidth - 2 * margin, 10, false) + 15;
+
+                // Оригинальный текст
+                pdf.setTextColor(255, 127, 50);
+                yPosition = addText('Исходный текст:', margin, yPosition, pageWidth - 2 * margin, 11, true) + 8;
+
+                pdf.setTextColor(44, 62, 80);
+                yPosition = addText(cleanText(content.originalText), margin, yPosition, pageWidth - 2 * margin, 10, false) + 15;
+
+                // Результаты анализа
+                pdf.setTextColor(21, 114, 255);
+                yPosition = addText('Результаты анализа:', margin, yPosition, pageWidth - 2 * margin, 11, true) + 8;
+
+                pdf.setTextColor(44, 62, 80);
+                addText(cleanText(content.analysis), margin, yPosition, pageWidth - 2 * margin, 10, false);
+
+                // Сохраняем PDF
+                const fileName = `анализ_${this.fixFileName(content.title)}_${Date.now()}.pdf`;
+                pdf.save(fileName);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
-    // Функция для создания безопасного имени файла
+    // ПРОСТОЙ И НАДЕЖНЫЙ МЕТОД (основной рекомендуемый)
+    static async generateUniversalPdf(content: PdfContent): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                const pdf = new jsPDF();
+                const margin = 20;
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+
+                let yPosition = margin;
+
+                // Функция для очистки текста
+                const cleanText = (text: string): string => {
+                    if (!text) return '';
+                    return text
+                        .replace(/[^\x20-\x7E\xA0-\xFF\u0400-\u04FF\n\r\t]/g, '')
+                        .replace(/null/gi, '')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .replace(/[ \t]{2,}/g, ' ')
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .join('\n')
+                        .trim();
+                };
+
+                // Улучшенная функция добавления текста
+                const addText = (text: string, fontSize: number = 10, isBold: boolean = false, color?: number[]): void => {
+                    if (color) {
+                        pdf.setTextColor(color[0], color[1], color[2]);
+                    } else {
+                        pdf.setTextColor(0, 0, 0); // черный по умолчанию
+                    }
+
+                    pdf.setFontSize(fontSize);
+                    pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+
+                    const maxWidth = pageWidth - 2 * margin;
+                    const cleanedText = cleanText(text);
+                    const lines = pdf.splitTextToSize(cleanedText, maxWidth);
+
+                    for (let i = 0; i < lines.length; i++) {
+                        // Проверяем границы страницы
+                        if (yPosition > pageHeight - margin) {
+                            pdf.addPage();
+                            yPosition = margin;
+                        }
+
+                        pdf.text(lines[i], margin, yPosition);
+                        yPosition += 7; // межстрочный интервал
+                    }
+
+                    // Добавляем отступ после блока
+                    yPosition += 5;
+                };
+
+                // Заголовок
+                addText('Анализ рекламного текста', 16, true, [21, 114, 255]);
+                yPosition += 5;
+
+                // Мета-информация
+                addText(`Заголовок: ${content.title}`, 10, false, [44, 62, 80]);
+                addText(`Тип отчета: ${content.reportType === 'short' ? 'Краткий' : 'Полный'}`, 10, false, [44, 62, 80]);
+                addText(`Дата анализа: ${content.timestamp}`, 10, false, [44, 62, 80]);
+                yPosition += 10;
+
+                // Оригинальный текст
+                addText('Исходный текст:', 12, true, [255, 127, 50]);
+                addText(content.originalText, 10, false, [44, 62, 80]);
+                yPosition += 10;
+
+                // Результаты анализа
+                addText('Результаты анализа:', 12, true, [21, 114, 255]);
+                addText(content.analysis, 10, false, [44, 62, 80]);
+
+                // Сохраняем PDF
+                const fileName = `анализ_${this.fixFileName(content.title)}_${Date.now()}.pdf`;
+                pdf.save(fileName);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    // ОСНОВНОЙ МЕТОД ДЛЯ ИСПОЛЬЗОВАНИЯ В ХУКЕ
+    static async generatePdf(content: PdfContent): Promise<void> {
+        // Используем универсальный метод как основной
+        return this.generateUniversalPdf(content);
+    }
+
+    // Простой метод как запасной вариант
+    static async generateSimplePdf(content: PdfContent): Promise<void> {
+        return this.generateUniversalPdf(content);
+    }
+
     private static fixFileName(text: string): string {
         return text
             .replace(/[^a-zа-яё0-9]/gi, '_')
             .replace(/_+/g, '_')
             .replace(/^_|_$/g, '')
             .substring(0, 50);
-    }
-
-    // Альтернативный метод с использованием canvas для лучшей поддержки кириллицы
-    static async generateAnalysisPdfWithCanvas(content: PdfContent): Promise<void> {
-        try {
-            // Динамически импортируем html2canvas для уменьшения размера бандла
-            const html2canvas = (await import('html2canvas')).default;
-
-            // Создаем временный элемент для рендеринга
-            const element = document.createElement('div');
-            element.style.position = 'absolute';
-            element.style.left = '-9999px';
-            element.style.top = '0';
-            element.style.width = '794px'; // A4 width in pixels
-            element.style.padding = '40px';
-            element.style.backgroundColor = 'white';
-            element.style.fontFamily = 'Arial, sans-serif';
-            element.style.color = '#2c3e50';
-            element.style.lineHeight = '1.6';
-
-            element.innerHTML = `
-        <div style="font-family: Arial, sans-serif;">
-          <h1 style="color: #1572FF; border-bottom: 2px solid #1572FF; padding-bottom: 10px; margin-bottom: 30px;">
-            Анализ рекламного текста
-          </h1>
-          
-          <div style="margin-bottom: 25px;">
-            <p><strong>Заголовок:</strong> ${this.escapeHtml(content.title)}</p>
-            <p><strong>Тип отчета:</strong> ${content.reportType === 'short' ? 'Краткий' : 'Полный'}</p>
-            <p><strong>Дата анализа:</strong> ${this.escapeHtml(content.timestamp)}</p>
-          </div>
-
-          <div style="margin-bottom: 30px;">
-            <h2 style="color: #FF7F32; margin-bottom: 15px;">Исходный текст:</h2>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #FF7F32;">
-              ${this.formatTextForHtml(content.originalText)}
-            </div>
-          </div>
-
-          <div style="margin-bottom: 30px;">
-            <h2 style="color: #1572FF; margin-bottom: 15px;">Результаты анализа:</h2>
-            <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; border-left: 4px solid #1572FF;">
-              ${this.formatTextForHtml(content.analysis)}
-            </div>
-          </div>
-
-          <footer style="margin-top: 50px; text-align: center; color: #7f8c8d; font-size: 12px; border-top: 1px solid #ecf0f1; padding-top: 20px;">
-            <p>Сгенерировано ФоксПлюс - сервис анализа рекламных текстов*</p>
-            Сервис предоставляет предварительную оценку и носит рекомендательный характер. Для 
-            получения официального юридического аключения обратитесь к специалисту.
-          </footer>
-        </div>
-      `;
-
-            document.body.appendChild(element);
-
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#ffffff'
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 210;
-            const pageHeight = 295;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`анализ_${this.fixFileName(content.title)}_${Date.now()}.pdf`);
-
-            document.body.removeChild(element);
-        } catch (error) {
-            console.error('Canvas PDF generation failed, falling back to text PDF:', error);
-            // Если метод с canvas не сработал, используем текстовый метод
-            return this.generateAnalysisPdf(content);
-        }
-    }
-
-    private static escapeHtml(text: string): string {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    private static formatTextForHtml(text: string): string {
-        if (!text) return '';
-
-        return text
-            .replace(/null/g, '')
-            .replace(/\u0000/g, '')
-            .replace(/\n/g, '<br>')
-            .replace(/\r/g, '');
     }
 }
