@@ -5,18 +5,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8000"
-    volumes:
-      - ./models:/app/models
     environment:
-      - TRANSFORMERS_CACHE=/app/models
-      - HF_HOME=/app/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+      - GIGACHAT_CLIENT_ID=MDE5YTVmM2UtZWU0Ny03NGQ0LWE1MWQtMWNhNTc4MzY5ODNl
+      - GIGACHAT_CLIENT_SECRET=NWQxZWNmMmEtZWIxNi00YmU0LWI5ZWUtODczMDYzMWEzZTE3
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     restart: unless-stopped
     networks:
       - app-network
