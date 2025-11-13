@@ -2,24 +2,22 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Минимальные системные зависимости
+# Устанавливаем системные зависимости
 RUN apt-get update && apt-get install -y \
-    curl \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Установка Ollama
-RUN curl -fsSL https://ollama.ai/install.sh | sh
-
+# Копируем requirements и устанавливаем Python зависимости
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Копируем код приложения
 COPY app.py .
 
-# Создаем скрипт для запуска
-RUN echo '#!/bin/bash\n\
-ollama serve &\n\
-sleep 15\n\
-ollama pull llava\n\
-python app.py\n' > /app/start.sh && chmod +x /app/start.sh
+# Создаем пользователя для безопасности
+RUN useradd -m -u 1000 user
+USER user
 
-CMD ["/app/start.sh"]
+EXPOSE 8000
+
+CMD ["python", "app.py"]

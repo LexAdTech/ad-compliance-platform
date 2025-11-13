@@ -117,6 +117,52 @@
   object-fit: contain;
 }
 
+/* Стили для превью изображения */
+.imagePreviewContainer {
+  margin-bottom: 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  background: #f8f9fa;
+}
+
+.imagePreviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.clearImageButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.clearImageButton:hover {
+  background: #c82333;
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
+}
+
 .textarea {
   font-size: 16px;
   resize: none;
@@ -135,6 +181,12 @@
 .textarea:focus {
   outline: none;
   border-color: #1572FF;
+}
+
+.textarea:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .checkButton {
@@ -293,6 +345,23 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Адаптивность для превью изображения */
+@media (max-width: 768px) {
+  .imagePreviewContainer {
+    padding: 10px;
+  }
+  
+  .imagePreview {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .imagePreview {
+    max-height: 200px;
+  }
 }
 
 @media (max-width: 900px) {

@@ -8,11 +8,11 @@ from typing import Optional
 
 app = FastAPI()
 
-# Конфигурация GigaChat API
+# Конфигурация GigaChat API из переменных окружения
 GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 GIGACHAT_API_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 
-AUTH_BASE64 = "MDE5YTVmM2UtZWU0Ny03NGQ0LWE1MWQtMWNhNTc4MzY5ODNlOjVkMWVjZjJhLWViMTYtNGJlNC1iOWVlLTg3MzA2MzFhM2UxNw=="
+AUTH_BASE64 = os.getenv("GIGACHAT_AUTH_BASE64", "")
 SCOPE = "GIGACHAT_API_PERS"
 
 _access_token = None
