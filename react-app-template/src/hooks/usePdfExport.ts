@@ -5,7 +5,7 @@ import { PdfService, PdfContent } from '../services/PdfService';
 export const usePdfExport = () => {
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const exportAnalysisToPdf = async (data: Omit<PdfContent, 'timestamp'>) => {
+    const exportAnalysisToPdf = async (data: Omit<PdfContent, 'timestamp'>, useCanvas: boolean = true) => {
         setIsGenerating(true);
         try {
             const fullContent: PdfContent = {
@@ -19,56 +19,31 @@ export const usePdfExport = () => {
                 })
             };
 
-            console.log('Starting PDF generation with content:', {
-                title: fullContent.title,
-                originalTextLength: fullContent.originalText?.length,
-                analysisLength: fullContent.analysis?.length,
-                reportType: fullContent.reportType
-            });
-
-            // Пробуем основной метод
-            await PdfService.generatePdf(fullContent);
-            console.log('PDF generated successfully');
+            if (useCanvas) {
+                await PdfService.generateAnalysisPdfWithCanvas(fullContent);
+            } else {
+                await PdfService.generateAnalysisPdf(fullContent);
+            }
             return true;
         } catch (error) {
-            console.error('Main PDF generation failed:', error);
+            console.error('Ошибка при генерации PDF:', error);
 
-            // Пробуем запасные методы
+            // Пробуем альтернативный метод
             try {
                 const fullContent: PdfContent = {
                     ...data,
-                    timestamp: new Date().toLocaleString('ru-RU', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
+                    timestamp: new Date().toLocaleString('ru-RU')
                 };
 
-                console.log('Trying fallback PDF generation method...');
-
-                // Пробуем альтернативный метод
-                await PdfService.generateAnalysisPdf(fullContent);
-                console.log('Fallback PDF generation successful');
+                if (useCanvas) {
+                    await PdfService.generateAnalysisPdf(fullContent);
+                } else {
+                    await PdfService.generateAnalysisPdfWithCanvas(fullContent);
+                }
                 return true;
             } catch (fallbackError) {
-                console.error('All PDF generation methods failed:', fallbackError);
-
-                // Последняя попытка - самый простой метод
-                try {
-                    const fullContent: PdfContent = {
-                        ...data,
-                        timestamp: new Date().toLocaleString('ru-RU')
-                    };
-
-                    await PdfService.generateSimplePdf(fullContent);
-                    console.log('Simple PDF generation successful');
-                    return true;
-                } catch (finalError) {
-                    console.error('Final PDF generation attempt failed:', finalError);
-                    throw new Error('Не удалось создать PDF файл. Пожалуйста, попробуйте еще раз.');
-                }
+                console.error('Fallback PDF generation also failed:', fallbackError);
+                throw new Error('Не удалось создать PDF файл');
             }
         } finally {
             setIsGenerating(false);

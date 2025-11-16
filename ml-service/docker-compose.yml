@@ -5,18 +5,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8000"
-    volumes:
-      - ./models:/app/models
+    env_file:
+      - .env
     environment:
-      - TRANSFORMERS_CACHE=/app/models
-      - HF_HOME=/app/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+      - GIGACHAT_AUTH_BASE64=${GIGACHAT_AUTH_BASE64}
     restart: unless-stopped
     networks:
       - app-network
@@ -27,17 +19,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8002:8000"
-    volumes:
-      - ollama_data:/root/.ollama
+    env_file:
+      - .env
     environment:
-      - OLLAMA_HOST=0.0.0.0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+      - YANDEX_VISION_API_KEY=${YANDEX_VISION_API_KEY}
+      - YANDEX_FOLDER_ID=${YANDEX_FOLDER_ID}
+      - GIGACHAT_AUTH_BASE64=${GIGACHAT_AUTH_BASE64}
     restart: unless-stopped
     networks:
       - app-network

@@ -1,66 +1,117 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
-import torch
+import requests
 import os
+import time
+import uuid
+from typing import Optional
 
 app = FastAPI()
 
-print(f"CUDA available: {torch.cuda.is_available()}")
-if torch.cuda.is_available():
-    print(f"CUDA device count: {torch.cuda.device_count()}")
-    for i in range(torch.cuda.device_count()):
-        print(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+# Конфигурация GigaChat API из переменных окружения
+GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+GIGACHAT_API_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 
-model_path = "/app/models/qwen-model-1.7B"
+AUTH_BASE64 = os.getenv("GIGACHAT_AUTH_BASE64", "")
+SCOPE = "GIGACHAT_API_PERS"
 
-print("Checking model files...")
-if not os.path.exists(model_path):
-    raise Exception(f"Model not found at {model_path}")
-
-print("Model files:", os.listdir(model_path))
-
-print("Loading tokenizer...")
-try:
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_path, 
-        trust_remote_code=True
-    )
-    streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-    print("Tokenizer loaded successfully")
-except Exception as e:
-    print(f"Error loading tokenizer: {e}")
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-print("Loading model...")
-try:
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        torch_dtype=torch.float16,
-        device_map="auto",
-        trust_remote_code=True,
-        low_cpu_mem_usage=True
-    )
-    print(f"Model loaded successfully on device: {model.device}")
-except Exception as e:
-    print(f"Error loading model on GPU: {e}")
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        torch_dtype=torch.float32,
-        device_map="cpu",
-        trust_remote_code=True
-    )
-    print("Model loaded on CPU")
+_access_token = None
+_token_expires_at = 0
 
 class TextRequest(BaseModel):
     text: str
-    report_type: str = "short"  # По умолчанию краткий отчет
+    report_type: str = "short"
+
+def get_access_token() -> str:
+    """Получение access token для GigaChat API"""
+    global _access_token, _token_expires_at
+    
+    # Проверка, не истек ли текущий токен
+    if _access_token and time.time() < _token_expires_at:
+        return _access_token
+    
+    try:
+        print("Attempting to get access token from GigaChat API...")
+        
+        response = requests.post(
+            GIGACHAT_AUTH_URL,
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'RqUID': str(uuid.uuid4()),
+                'Authorization': f'Basic {AUTH_BASE64}'
+            },
+            data={'scope': SCOPE},
+            verify=False,
+            timeout=30
+        )
+        
+        print(f"Auth response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            _access_token = data['access_token']
+            _token_expires_at = time.time() + 3600 - 60
+            print("Successfully obtained access token")
+            return _access_token
+        else:
+            error_msg = f"Auth failed: {response.status_code} - {response.text}"
+            print(error_msg)
+            raise Exception(error_msg)
+            
+    except requests.exceptions.RequestException as e:
+        error_msg = f"Network error: {str(e)}"
+        print(error_msg)
+        raise Exception(error_msg)
+    except Exception as e:
+        error_msg = f"Unexpected error: {str(e)}"
+        print(error_msg)
+        raise Exception(error_msg)
+
+def analyze_with_gigachat(prompt: str, max_tokens: int = 1000) -> str:
+    """Отправка запроса к GigaChat API"""
+    try:
+        access_token = get_access_token()
+        print("Sending analysis request to GigaChat...")
+        
+        response = requests.post(
+            GIGACHAT_API_URL,
+            headers={
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                "model": "GigaChat",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                "temperature": 0.7,
+                "max_tokens": max_tokens,
+                "top_p": 0.9
+            },
+            verify=False,
+            timeout=30
+        )
+        
+        print(f"Analysis response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['choices'][0]['message']['content']
+        else:
+            raise Exception(f"GigaChat API error: {response.status_code} - {response.text}")
+            
+    except Exception as e:
+        raise Exception(f"Error calling GigaChat: {str(e)}")
 
 @app.post("/analyze")
 async def analyze_text(request: TextRequest):
     try:
         if request.report_type == "full":
-            # Промпт для полного отчета
             prompt = f'''Ты — юридический эксперт по рекламному законодательству Российской Федерации.  
 Твоя задача — проанализировать рекламный текст исключительно в рамках Федерального закона № 38-ФЗ «О рекламе» и практики ФАС России.  
 
@@ -71,7 +122,6 @@ async def analyze_text(request: TextRequest):
 — НЕ используй маркетинговый или разговорный язык.  
 — Все формулировки — юридически точные, с указанием статей и пунктов закона.  
 — Если нарушение отсутствует в каком-либо разделе — напиши: «Нарушений не выявлено».
-— Уложись в 600 токенов. Больше ничего не пиши.
 
 Рекламный текст для анализа: {request.text}
 
@@ -95,11 +145,13 @@ async def analyze_text(request: TextRequest):
 - Заменить на: «[нейтральная, соответствующая закону формулировка]».  
 (Если корректировка не требуется — укажи: «Корректировка не требуется».)"
 
-Больше ничего не пиши.
-'''
+Больше ничего не пиши.'''
+            max_tokens = 1000
         else:
-            # Промпт для краткого отчета
-            prompt = f'''Текст: "{request.text}"
+            prompt = f'''Ты — юридический эксперт по рекламному законодательству. 
+Проанализируй рекламный текст на соответствие ФЗ-38 "О рекламе". 
+
+Текст: "{request.text}"
             
 Формат ответа (Только один вариант, уложись в 100 токенов. Больше ничего не пиши.):
 "Несоответствие! [одна фраза о нарушении]"
@@ -107,78 +159,59 @@ async def analyze_text(request: TextRequest):
 "Реклама соответствует законодательству."
 
 Ответ:'''
+            max_tokens = 100
 
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-        
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=1000 if request.report_type == "full" else 100,
-            do_sample=True,
-            temperature=1.2,
-            top_p=0.9,
-            streamer=streamer,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-        )
-        
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        analysis_result = response.replace(prompt, "").strip()
-        
-        # УЛУЧШЕННАЯ ОБРЕЗКА РЕЗУЛЬТАТА
-        if request.report_type == "full":
-            # Находим первое вхождение структуры отчета
-            start_marker = "1. Выявленные нарушения"
-            start_index = analysis_result.find(start_marker)
-            
-            if start_index != -1:
-                # Обрезаем все, что до первого маркера
-                analysis_result = analysis_result[start_index:]
-                
-                # Ищем ВСЕ возможные точки обрезки
-                cut_points = []
-                
-                # 1. Второе вхождение начального маркера
-                second_occurrence = analysis_result.find(start_marker, len(start_marker))
-                if second_occurrence != -1:
-                    cut_points.append(second_occurrence)
-                
-                # 2. Тройные кавычки ```
-                triple_quotes_index = analysis_result.find('```')
-                if triple_quotes_index != -1:
-                    cut_points.append(triple_quotes_index)
-                
-                # 3. Начало нового блока кода (если есть)
-                code_block_start = analysis_result.find('\n```')
-                if code_block_start != -1:
-                    cut_points.append(code_block_start)
-                
-                # Если нашли точки обрезки, берем самую раннюю
-                if cut_points:
-                    earliest_cut = min(cut_points)
-                    analysis_result = analysis_result[:earliest_cut].strip()
-            
-            # Дополнительная очистка: удаляем кавычки в начале, если есть
-            analysis_result = analysis_result.lstrip('"').strip()
-            
-            # Удаляем тройные кавычки в начале и конце, если остались
-            analysis_result = analysis_result.strip('`').strip()
-            
-        else:
-            # Для краткого отчета - берем только первую фразу
-            lines = analysis_result.split('\n')
-            if lines:
-                analysis_result = lines[0].strip()
-                # Удаляем кавычки если есть, включая тройные
-                analysis_result = analysis_result.strip('"').strip('`')
+        analysis_result = analyze_with_gigachat(prompt, max_tokens)
+        analysis_result = analysis_result.strip()
         
         return {"analysis": analysis_result}
     
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=f"Analysis error: {str(e)}")
 
 @app.get("/service_check")
 async def service_check():
-    return {"status": "ready"}
+    try:
+        token = get_access_token()
+        return {
+            "status": "ready", 
+            "gigachat_auth": "success",
+            "message": "Service and GigaChat API are working"
+        }
+    except Exception as e:
+        return {
+            "status": "error", 
+            "gigachat_auth": "failed",
+            "message": str(e)
+        }
+
+@app.get("/models")
+async def get_available_models():
+    """Получение списка доступных моделей GigaChat"""
+    try:
+        access_token = get_access_token()
+        
+        response = requests.get(
+            "https://gigachat.devices.sberbank.ru/api/v1/models",
+            headers={
+                'Accept': 'application/json',
+                'Authorization': f'Bearer {access_token}'
+            },
+            verify=False,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+async def root():
+    return {"message": "Text Analyzer Service is running"}
 
 if __name__ == "__main__":
     import uvicorn

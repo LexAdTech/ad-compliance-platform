@@ -1,5 +1,5 @@
 // Файл: ./pages/Home/HomePage.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Header } from '../../components/Header/Header';
 import SvgIcon from '../../components/Common/SvgIcon';
 import { useAuthContext } from '../../contexts/AuthContext';
@@ -33,12 +33,23 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { isLoggedIn } = useAuthContext();
   const { exportAnalysisToPdf, isGenerating } = usePdfExport();
+
+  // Очистка превью изображения при размонтировании
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   // Функция для загрузки рекомендаций
   const loadRecommendations = async (text: string) => {
@@ -60,6 +71,12 @@ export const HomePage: React.FC<HomePageProps> = ({
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('audio/')) {
+      // Очищаем превью изображения при загрузке аудио
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+        setImagePreview(null);
+      }
+      setCurrentImageFile(null);
       handleAudioAnalysis(file);
     } else if (file) {
       setError('Пожалуйста, выберите аудиофайл');
@@ -70,6 +87,13 @@ export const HomePage: React.FC<HomePageProps> = ({
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      // Создаем превью изображения
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+      setCurrentImageFile(file);
+      setError(null);
+      setAnalysisResult('');
+      setAdText(''); // Очищаем текстовое поле при загрузке изображения
       handleImageAnalysis(file);
     } else if (file) {
       setError('Пожалуйста, выберите изображение');
@@ -84,55 +108,74 @@ export const HomePage: React.FC<HomePageProps> = ({
     setRecommendedArticles([]);
 
     try {
-      const formData = new FormData();
-      formData.append('audio', audioFile);
+        const formData = new FormData();
+        formData.append('audio', audioFile);
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-      const response = await fetch(`${API_BASE_URL}/api/analyze/audio`, {
-        method: 'POST',
-        body: formData,
-      });
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const response = await fetch(`${API_BASE_URL}/api/analyze/audio`, {
+            method: 'POST',
+            body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
+        console.log('Audio analysis response status:', response.status);
 
-      const result = await response.json();
-      
-      if (result.error) {
-        setError(result.error);
-      } else {
-        setAdText(result.converted_text || '');
-        setAnalysisResult(result.analysis);
-        // Загружаем рекомендации после успешного анализа
-        if (result.converted_text) {
-          await loadRecommendations(result.converted_text);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
         }
-      }
+
+        const result = await response.json();
+        console.log('Audio analysis result:', result);
+        
+        if (result.error) {
+            setError(result.error);
+        } else {
+            setAdText(result.converted_text || '');
+            setAnalysisResult(result.analysis);
+            // Загружаем рекомендации после успешного анализа
+            if (result.converted_text) {
+                await loadRecommendations(result.converted_text);
+            }
+        }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ошибка при анализе аудио');
+        const errorMessage = err instanceof Error ? err.message : 'Ошибка при анализе аудио';
+        setError(errorMessage);
+        console.error('Audio analysis error:', errorMessage);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   // Анализ изображения
-  const handleImageAnalysis = async (imageFile: File) => {
+const handleImageAnalysis = async (imageFile: File) => {
     setIsAnalyzingImage(true);
     setError(null);
     setAnalysisResult('');
     setRecommendedArticles([]);
 
     try {
-      const result = await imageAnalysisService.analyzeAdImage(imageFile);
-      setAnalysisResult(result.analysis);
-      // Для изображений рекомендации не загружаем, так как нет текста
+        const result = await imageAnalysisService.analyzeAdImage(imageFile);
+        
+        console.log('Image analysis result:', result);
+        
+        // Убеждаемся, что analysisResult всегда строка
+        if (typeof result.analysis === 'string') {
+            setAnalysisResult(result.analysis);
+        } else if (result.error) {
+            setAnalysisResult(`❌ Ошибка: ${result.error}`);
+        } else {
+            setAnalysisResult('Результат анализа получен, но имеет неожиданный формат');
+        }
+        
+        // Для изображений рекомендации не загружаем, так как нет текста
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ошибка при анализе изображения');
+        const errorMessage = err instanceof Error ? err.message : 'Ошибка при анализе изображения';
+        setError(errorMessage);
+        setAnalysisResult(`❌ ${errorMessage}`);
     } finally {
-      setIsAnalyzingImage(false);
+        setIsAnalyzingImage(false);
     }
-  };
+};
 
   const handleAudioIconClick = () => {
     fileInputRef.current?.click();
@@ -142,6 +185,17 @@ export const HomePage: React.FC<HomePageProps> = ({
     imageInputRef.current?.click();
   };
 
+  // Очистка изображения
+  const handleClearImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    setCurrentImageFile(null);
+    setAnalysisResult('');
+    setError(null);
+  };
+
   // Экспорт PDF
   const handleExportPdf = async () => {
     if (!analysisResult) return;
@@ -149,7 +203,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     try {
       await exportAnalysisToPdf({
         title: `Анализ рекламы - ${new Date().toLocaleDateString('ru-RU')}`,
-        originalText: adText || 'Графическая реклама',
+        originalText: adText || (currentImageFile ? `Изображение: ${currentImageFile.name}` : 'Графическая реклама'),
         analysis: analysisResult,
         reportType: isLoggedIn ? 'full' : 'short'
       });
@@ -165,6 +219,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       return;
     }
 
+    // Очищаем изображение при анализе текста
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    setCurrentImageFile(null);
+
     setLoading(true);
     setError(null);
     setAnalysisResult('');
@@ -176,16 +237,27 @@ export const HomePage: React.FC<HomePageProps> = ({
         isLoggedIn ? 'full' : 'short'
       );
 
-      setAnalysisResult(result.analysis || result.error || 'Анализ завершен');
+      // Убеждаемся, что analysisResult всегда строка
+      if (typeof result.analysis === 'string') {
+        setAnalysisResult(result.analysis);
+      } else if (result.error) {
+        setAnalysisResult(`❌ Ошибка: ${result.error}`);
+      } else {
+        setAnalysisResult('Анализ завершен');
+      }
       
       // Загружаем рекомендации после успешного анализа
       await loadRecommendations(adText);
       
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(`Ошибка: ${err.message}`);
+        const errorMessage = `Ошибка: ${err.message}`;
+        setError(errorMessage);
+        setAnalysisResult(errorMessage);
       } else {
-        setError('Неизвестная ошибка при анализе текста');
+        const errorMessage = 'Неизвестная ошибка при анализе текста';
+        setError(errorMessage);
+        setAnalysisResult(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -194,6 +266,17 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   const handleDetailedResultLogin = () => {
     onLoginClick();
+  };
+
+  // Безопасное разбиение строки для отображения
+  const renderAnalysisText = (text: string) => {
+    if (typeof text !== 'string') {
+      return <p>Неверный формат результата анализа</p>;
+    }
+
+    return text.split('\n').map((paragraph, index) => (
+      <p key={index}>{paragraph}</p>
+    ));
   };
 
   return (
@@ -263,21 +346,49 @@ export const HomePage: React.FC<HomePageProps> = ({
             />
           </div>
           
+          {/* Превью загруженного изображения */}
+          {imagePreview && (
+            <div className={styles.imagePreviewContainer}>
+              <div className={styles.imagePreviewHeader}>
+                <span>Загруженное изображение:</span>
+                <button 
+                  onClick={handleClearImage}
+                  className={styles.clearImageButton}
+                  title="Удалить изображение"
+                >
+                  ×
+                </button>
+              </div>
+              <img 
+                src={imagePreview} 
+                alt="Предпросмотр загруженного изображения" 
+                className={styles.imagePreview}
+              />
+            </div>
+          )}
+          
           <textarea
             value={adText}
             onChange={(e) => setAdText(e.target.value)}
             rows={4}
             className={styles.textarea}
             placeholder="Введите текст рекламы для проверки..."
-            disabled={loading || isAnalyzingImage}
+            disabled={loading || isAnalyzingImage || !!imagePreview}
           />
-
+          
           <button
             onClick={handleCheck}
             className={styles.checkButton}
-            disabled={loading || isAnalyzingImage || !adText.trim()}
+            disabled={loading || isAnalyzingImage || (!adText.trim() && !imagePreview)}
           >
-            {loading ? 'Анализ...' : 'Проверить текст'}
+            {loading 
+              ? 'Анализ...' 
+              : isAnalyzingImage 
+                ? 'Анализ изображения...' 
+                : isLoggedIn 
+                  ? 'Получить полный анализ' 
+                  : 'Проверить'
+            }
           </button>
 
           {(loading || isAnalyzingImage) && (
@@ -325,19 +436,19 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </>
                 ) : (
                   <div className={styles.analysisText}>
-                    {analysisResult.split('\n').map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))}
+                    {renderAnalysisText(analysisResult)}
                   </div>
                 )}
               </div>
 
-              {/* Блок рекомендаций */}
-              <ArticleRecommendations
-                articles={recommendedArticles}
-                loading={isLoadingRecommendations}
-                onArticleClick={onArticleClick}
-              />
+              {/* Блок рекомендаций - показываем только если есть текст для анализа */}
+              {adText.trim() && (
+                <ArticleRecommendations
+                  articles={recommendedArticles}
+                  loading={isLoadingRecommendations}
+                  onArticleClick={onArticleClick}
+                />
+              )}
             </>
           )}
         </section>

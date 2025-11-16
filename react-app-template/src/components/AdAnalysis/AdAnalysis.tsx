@@ -2,13 +2,9 @@
 import React, { useState } from 'react';
 import { adAnalysisService, AnalysisResult } from '../../services/adAnalysisService';
 import { usePdfExport } from '../../hooks/usePdfExport';
-import styles from './AdAnalysis.module.css';
+import './AdAnalysis.css';
 
-interface AdAnalysisProps {
-    onAnalysisComplete?: (result: AnalysisResult) => void;
-}
-
-export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) => {
+export const AdAnalysis: React.FC = () => {
     const [text, setText] = useState('');
     const [reportType, setReportType] = useState<'short' | 'full'>('short');
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -29,7 +25,6 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
         try {
             const result = await adAnalysisService.analyzeAdText(text, reportType);
             setAnalysisResult(result);
-            onAnalysisComplete?.(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Произошла ошибка при анализе');
             setAnalysisResult(null);
@@ -43,7 +38,7 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
 
         try {
             await exportAnalysisToPdf({
-                title: `Анализ рекламного текста - ${new Date().toLocaleDateString('ru-RU')}`,
+                title: `Анализ текста от ${new Date().toLocaleDateString('ru-RU')}`,
                 originalText: text,
                 analysis: analysisResult.analysis,
                 reportType: reportType
@@ -60,14 +55,14 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
     };
 
     return (
-        <div className={styles.adAnalysis}>
-            <div className={styles.analysisHeader}>
+        <div className="ad-analysis">
+            <div className="analysis-header">
                 <h2>Анализ рекламного текста</h2>
                 <p>Получите профессиональный анализ вашего рекламного текста с помощью AI</p>
             </div>
 
-            <div className={styles.analysisControls}>
-                <div className={styles.inputGroup}>
+            <div className="analysis-controls">
+                <div className="input-group">
                     <label htmlFor="ad-text">Рекламный текст:</label>
                     <textarea
                         id="ad-text"
@@ -75,14 +70,14 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
                         onChange={(e) => setText(e.target.value)}
                         placeholder="Введите ваш рекламный текст здесь..."
                         rows={6}
-                        className={styles.textInput}
+                        className="text-input"
                     />
                 </div>
 
-                <div className={styles.reportTypeGroup}>
+                <div className="report-type-group">
                     <label>Тип отчета:</label>
-                    <div className={styles.radioButtons}>
-                        <label className={styles.radioLabel}>
+                    <div className="radio-buttons">
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 value="short"
@@ -91,7 +86,7 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
                             />
                             Краткий
                         </label>
-                        <label className={styles.radioLabel}>
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 value="full"
@@ -103,11 +98,11 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
                     </div>
                 </div>
 
-                <div className={styles.actionButtons}>
+                <div className="action-buttons">
                     <button
                         onClick={handleAnalyze}
                         disabled={isLoading || !text.trim()}
-                        className={styles.analyzeBtn}
+                        className="analyze-btn"
                     >
                         {isLoading ? 'Анализ...' : 'Проанализировать'}
                     </button>
@@ -115,7 +110,7 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
                     <button
                         onClick={handleClear}
                         disabled={isLoading}
-                        className={styles.clearBtn}
+                        className="clear-btn"
                     >
                         Очистить
                     </button>
@@ -123,32 +118,32 @@ export const AdAnalysis: React.FC<AdAnalysisProps> = ({ onAnalysisComplete }) =>
             </div>
 
             {error && (
-                <div className={styles.errorMessage}>
+                <div className="error-message">
                     {error}
                 </div>
             )}
 
             {analysisResult && (
-                <div className={styles.analysisResult}>
-                    <div className={styles.resultHeader}>
+                <div className="analysis-result">
+                    <div className="result-header">
                         <h3>Результаты анализа</h3>
                         <button
                             onClick={handleExportPdf}
                             disabled={isGenerating}
-                            className={styles.exportPdfBtn}
+                            className="export-pdf-btn"
                         >
-                            {isGenerating ? 'Создание PDF...' : '📥 Скачать PDF'}
+                            {isGenerating ? 'Создание PDF...' : 'Скачать PDF'}
                         </button>
                     </div>
 
-                    <div className={styles.resultContent}>
+                    <div className="result-content">
                         {analysisResult.error ? (
-                            <div className={styles.errorResult}>
+                            <div className="error-result">
                                 <strong>Ошибка:</strong> {analysisResult.error}
                             </div>
                         ) : (
-                            <div className={styles.successResult}>
-                                <div className={styles.analysisText}>
+                            <div className="success-result">
+                                <div className="analysis-text">
                                     {analysisResult.analysis.split('\n').map((paragraph, index) => (
                                         <p key={index}>{paragraph}</p>
                                     ))}

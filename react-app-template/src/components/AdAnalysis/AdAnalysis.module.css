@@ -1,28 +1,28 @@
-/* components/AdAnalysis/AdAnalysis.module.css */
-.adAnalysis {
+/* components/AdAnalysis/AdAnalysis.css */
+.ad-analysis {
     max-width: 800px;
     margin: 0 auto;
     padding: 30px 20px;
 }
 
-.analysisHeader {
+.analysis-header {
     text-align: center;
     margin-bottom: 40px;
 }
 
-.analysisHeader h2 {
+.analysis-header h2 {
     color: var(--text-dark);
     margin-bottom: 10px;
     font-size: 2.5rem;
     font-weight: 600;
 }
 
-.analysisHeader p {
+.analysis-header p {
     color: var(--text-gray);
     font-size: 1.1rem;
 }
 
-.analysisControls {
+.analysis-controls {
     background: white;
     padding: 30px;
     border-radius: 12px;
@@ -30,18 +30,18 @@
     margin-bottom: 30px;
 }
 
-.inputGroup {
+.input-group {
     margin-bottom: 25px;
 }
 
-.inputGroup label {
+.input-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
     color: var(--text-dark);
 }
 
-.textInput {
+.text-input {
     width: 100%;
     padding: 15px;
     border: 2px solid var(--border-color);
@@ -49,32 +49,31 @@
     font-size: 16px;
     resize: vertical;
     transition: border-color 0.3s, box-shadow 0.3s;
-    font-family: inherit;
 }
 
-.textInput:focus {
+.text-input:focus {
     outline: none;
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(21, 114, 255, 0.1);
 }
 
-.reportTypeGroup {
+.report-type-group {
     margin-bottom: 25px;
 }
 
-.reportTypeGroup label {
+.report-type-group label {
     display: block;
     margin-bottom: 12px;
     font-weight: 600;
     color: var(--text-dark);
 }
 
-.radioButtons {
+.radio-buttons {
     display: flex;
     gap: 20px;
 }
 
-.radioLabel {
+.radio-label {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -82,17 +81,17 @@
     font-weight: normal;
 }
 
-.radioLabel input[type="radio"] {
+.radio-label input[type="radio"] {
     accent-color: var(--primary-blue);
 }
 
-.actionButtons {
+.action-buttons {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
 }
 
-.analyzeBtn, .clearBtn, .exportPdfBtn {
+.analyze-btn, .clear-btn, .export-pdf-btn {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
@@ -100,49 +99,48 @@
     cursor: pointer;
     transition: all 0.3s;
     font-size: 16px;
-    font-family: inherit;
 }
 
-.analyzeBtn {
+.analyze-btn {
     background: var(--primary-blue);
     color: white;
 }
 
-.analyzeBtn:hover:not(:disabled) {
+.analyze-btn:hover:not(:disabled) {
     background: #0d5fd6;
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
 }
 
-.clearBtn {
+.clear-btn {
     background: var(--text-light);
     color: white;
 }
 
-.clearBtn:hover:not(:disabled) {
+.clear-btn:hover:not(:disabled) {
     background: #7a8b8c;
     transform: translateY(-2px);
 }
 
-.exportPdfBtn {
+.export-pdf-btn {
     background: var(--primary-orange);
     color: white;
     padding: 10px 20px;
     font-size: 14px;
 }
 
-.exportPdfBtn:hover:not(:disabled) {
+.export-pdf-btn:hover:not(:disabled) {
     background: #e6692b;
     transform: translateY(-2px);
 }
 
-.analyzeBtn:disabled, .exportPdfBtn:disabled {
+.analyze-btn:disabled, .export-pdf-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-.errorMessage {
+.error-message {
     background: #fee;
     border: 1px solid #fcc;
     color: #c33;
@@ -151,14 +149,14 @@
     margin-bottom: 20px;
 }
 
-.analysisResult {
+.analysis-result {
     background: white;
     border-radius: 12px;
     box-shadow: var(--shadow);
     overflow: hidden;
 }
 
-.resultHeader {
+.result-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -167,59 +165,59 @@
     color: white;
 }
 
-.resultHeader h3 {
+.result-header h3 {
     margin: 0;
     font-size: 1.5rem;
 }
 
-.resultContent {
+.result-content {
     padding: 30px;
 }
 
-.errorResult {
+.error-result {
     color: #c33;
     background: #fee;
     padding: 15px;
     border-radius: 8px;
 }
 
-.successResult {
+.success-result {
     line-height: 1.7;
 }
 
-.analysisText p {
+.analysis-text p {
     margin-bottom: 15px;
 }
 
-.analysisText p:last-child {
+.analysis-text p:last-child {
     margin-bottom: 0;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-    .adAnalysis {
+    .ad-analysis {
         padding: 20px 15px;
     }
 
-    .analysisControls {
+    .analysis-controls {
         padding: 20px;
     }
 
-    .resultHeader {
+    .result-header {
         flex-direction: column;
         gap: 15px;
         align-items: flex-start;
     }
 
-    .actionButtons {
+    .action-buttons {
         flex-direction: column;
     }
 
-    .analyzeBtn, .clearBtn {
+    .analyze-btn, .clear-btn {
         width: 100%;
     }
 
-    .radioButtons {
+    .radio-buttons {
         flex-direction: column;
         gap: 10px;
     }
