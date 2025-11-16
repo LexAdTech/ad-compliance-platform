@@ -12,10 +12,12 @@
     "@types/react-dom": "^18.3.1",
     "axios": "^1.7.9",
     "cesium": "^1.124.0",
-    "jspdf": "^3.0.3",
+    "html-to-image": "^1.11.13",
+    "jspdf": "^2.5.1",
     "jspdf-autotable": "^5.0.2",
     "mobx": "^6.13.5",
     "mobx-react-lite": "^4.0.7",
+    "pdfmake": "^0.2.20",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
@@ -49,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@types/pdfmake": "^0.2.12",
     "dotenv": "^16.4.7",
     "nodemon": "^3.1.7",
     "webpack": "^5.97.1",
