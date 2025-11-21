@@ -1,0 +1,35 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "services": [
+      {
+        "name": "text-analyzer",
+        "rootDir": "./text-analyzer",
+        "ports": [8001]
+      },
+      {
+        "name": "image-analyzer",
+        "rootDir": "./image-analyzer", 
+        "ports": [8002]
+      },
+      {
+        "name": "speech-to-text",
+        "rootDir": "./speech-to-text",
+        "ports": [8003]
+      },
+      {
+        "name": "spring-backend",
+        "rootDir": ".",
+        "ports": [8080]
+      },
+      {
+        "name": "react-frontend",
+        "rootDir": ".",
+        "ports": [3000]
+      }
+    ]
+  }
+}

@@ -1,4 +1,1 @@
-ml-service/models/qwen-model/
-ml-service/models/qwen-model-0.6B/
-ml-service/models/qwen-model-1.7B/
-
+.env
