@@ -1,2 +1,15 @@
-##  About The Project                       
-This platform automates the process of checking advertising materials (text, images) for potential violations of advertising legislation.
+# ФоксПлюс
+
+**Наш инструмент позволяет быстро и автоматически проверить текстовую, графическую или аудиорекламу на соответствие законодательству РФ**
+
+
+## Ссылка
+http://foxplus.tech/
+
+## Галерея
+
+![Анализатор рекламы](/images/1.png)
+
+![Статьи](/images/2.png)
+
+![О нас](/images/3.png)
